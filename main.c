@@ -11,7 +11,14 @@
 /* ************************************************************************** */
 
 #include <stdio.h>
-#include <mlx.h>
+#include <stdlib.h>
+#include <mlx.h>	
+
+int handle_input(int key)
+{
+	 key = 0;
+     return (key);
+}
 
 int	main(void)
 {
@@ -19,6 +26,10 @@ int	main(void)
 	void	*mlx_win;
 
 	mlx = mlx_init();
-	mlx_win = mlx_new_window(mlx, 1500, 500, "Abounab");
+	mlx_win = mlx_new_window(mlx, 500, 500, "Abounab");
 	mlx_loop(mlx);
+	mlx_key_hook(mlx_win, handle_input, NULL);
+	//graphical work
+	mlx_destroy_display(mlx);
+    free(mlx);
 }
