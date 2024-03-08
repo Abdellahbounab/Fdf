@@ -23,7 +23,7 @@ else
 	MLX_FLAGS =  -lmlx -framework OpenGL -framework AppKit
 endif
 
-all: $(MLX_LIB) $(NAME)
+all: $(NAME)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@ 

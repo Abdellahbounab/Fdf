@@ -21,23 +21,49 @@ typedef struct s_details{
 	int	y;
 	int	z;
 	int	color;
+	int opacity;
 }	t_details;
+
+int count_elements(char *str)
+{
+	int	len;
+
+	len = 0;
+	if (*str && (*str != ' ' && *str != '\t' && *str != '\n'))
+	{
+		len++;
+		str++;
+	}
+	while (*str)
+	{
+		if (*str && (*str != ' ' && *str != '\t' && *str != '\n')
+			&& ((*(str - 1) == ' ') || (*(str - 1) == '\t') 
+				|| (*(str - 1) == '\n')))
+			len++;
+		str++;
+	}
+	return (len);
+}
 
 int	valid_axis(char *file, t_details ***map)
 {
 	int		fd;
+	int		width;
 	char	*ligne;
 
 	fd = open(file, O_RDONLY);
 	ligne = get_next_line(fd);
-	while (ligne)
+	width = count_elements(ligne);//get the number of elements in the first line after checking valid digits && hexa for colors
+	while (ligne && *ligne)
 	{
 		// check if map have the same width length as the first line or higher : if less == error
-		extract_axis(ligne, map);
-		// check if map is only digits && colors hexa or decimial && insert the data required depends on its x, y, z
-		
-		ligne = get_next_line(fd);
+		// check if map is only digits && colors hexa or decimal && insert the data required depends on its x, y, z
+		if (extract_axis(ligne, map, width))
+			ligne = get_next_line(fd);
+		else    //freeing all malloced axises before exit
+			return (free(ligne), clear_axis(map), ft_errno(), NULL);		
 	}
+	close(fd);
 }
 
 int	ft_strncmp(char *str, char *cmp, int len)
@@ -58,9 +84,15 @@ int	ft_strncmp(char *str, char *cmp, int len)
 
 int	valid_file(char *name, char *fdf, int len)
 {
+	int fd;
+
 	if (ft_strncmp(name + len - 4, fdf, 4))
-		if (open(name, O_RDONLY) != -1)
-			return (1);
+	{
+		fd = open(name, O_RDONLY);
+		if (fd > -1)
+			return (close(fd), 1);
+		close(fd);
+	}
 	return (0);
 }
 
@@ -91,6 +123,14 @@ int	main(int argc, char **argv)
 		}
 	}
 
+
+
+
+	//about map :
+			//min width must be in first line
+			//only digits can make the highness or will get z'0
+			//colors can take hexa or decimal
+			//if planning for bonus must add opacity
 
 
 
