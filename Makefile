@@ -6,37 +6,34 @@ SRCS_OBJ = ${SRCS:.c=.o}
 
 NAME = Fdf
 
+UNAME = ${shell uname}
+
 CFLAGS = -Wall -Wextra -Werror
 
 ifeq ($(shell uname), Linux)
 	INCLUDES = -I/usr/include -Imlx
+	MLX_LIB = ./mlx/libmlx_$(UNAME).a
 else
-	INCLUDES = -I/opt/X11/include -Imlx
+	INCLUDES = -Imlx
 endif
- 
-MLX_DIR = ./mlx
-MLX_LIB = $(MLX_DIR)/libmlx_$(UNAME).a
 
 ifeq ($(shell uname), Linux)
 	MLX_FLAGS = -Lmlx -lmlx -L/usr/lib/X11 -lXext -lX11
 else
-	MLX_FLAGS = -Lmlx -lmlx -L/usr/X11/lib -lXext -lX11 -framework OpenGL -framework AppKit
+	MLX_FLAGS =  -lmlx -framework OpenGL -framework AppKit
 endif
- 
-# [...]
- 
+
 all: $(MLX_LIB) $(NAME)
- 
-.c.o:
-	$(CC) $(CFLAGS) -c -o $@ $< $(INCLUDES)
- 
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@ 
+
 $(NAME): $(SRCS_OBJ)
-	$(CC) $(CFLAGS) -o $(NAME) $(SRCS_OBJ) $(MLX_FLAGS)
+	$(CC) $(CFLAGS)  $(SRCS_OBJ) $(MLX_FLAGS) -o $(NAME) 
  
 $(MLX_LIB):
-	@make -C $(MLX_DIR)
+	@make -C /usr/library/
  
-# [...]
 clean :
 		rm -rf *.o
 
