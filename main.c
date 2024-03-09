@@ -29,12 +29,12 @@ int count_elements(char *str)
 	int	len;
 
 	len = 0;
-	if (*str && (*str != ' ' && *str != '\t' && *str != '\n'))
+	if (str && *str && (*str != ' ' && *str != '\t' && *str != '\n'))
 	{
 		len++;
 		str++;
 	}
-	while (*str)
+	while (str && *str)
 	{
 		if (*str && (*str != ' ' && *str != '\t' && *str != '\n')
 			&& ((*(str - 1) == ' ') || (*(str - 1) == '\t') 
@@ -45,24 +45,62 @@ int count_elements(char *str)
 	return (len);
 }
 
+t_details *get_data(char *str, int x, int y)
+{
+	//get data from str (the z and colors and (opacity that would be activated only in bonus part)can be hexa or decimal) anything else = 0
+	t_details *axis;
+
+	axis = (t_details *) malloc (sizeof(t_details));
+	if (axis)
+	{
+		return (axis);
+	}
+	return (NULL);
+}
+
+int extract_axis(char *ligne, t_details **map, int min_width, int x)
+{
+	int **arr;
+	int	y;
+
+	y = 0;
+	//gettin every line data into the map : *map[j] (malloced)
+	arr = ft_split("ligne", "\t ");
+	if (!arr || !arr[min_width])
+		return (free_arr(arr), NULL);
+	while (arr[y])
+	{//extarct data from every element(x, y, z, color) (hexa or decimal)
+		*map[y] = get_data(arr[y], x, y);
+		if (!*map[y])
+			return (free_axis(map, y), NULL);
+		y++;
+	}
+	return (NULL);
+}
+
 int	valid_axis(char *file, t_details ***map)
 {
 	int		fd;
-	int		width;
+	int		min_width;
 	char	*ligne;
+	int		i;
 
+	i = 0;
 	fd = open(file, O_RDONLY);
 	ligne = get_next_line(fd);
-	width = count_elements(ligne);//get the number of elements in the first line after checking valid digits && hexa for colors
+	min_width = count_elements(ligne);//get the number of elements in the first line after checking valid digits && hexa for colors
 	while (ligne && *ligne)
 	{
 		// check if map have the same width length as the first line or higher : if less == error
 		// check if map is only digits && colors hexa or decimal && insert the data required depends on its x, y, z
-		if (extract_axis(ligne, map, width))
+		if (extract_axis(ligne, map[i], min_width, i))
 			ligne = get_next_line(fd);
 		else    //freeing all malloced axises before exit
-			return (free(ligne), clear_axis(map), ft_errno(), NULL);		
+			return (free(ligne), clear_map(map, i - 1), ft_errno(), NULL);	
+		i++;	
 	}
+	if (!min_width)
+		return (free(ligne), ft_errno(), 0);
 	close(fd);
 }
 
