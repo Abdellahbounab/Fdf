@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/09 18:43:35 by abounab           #+#    #+#             */
-/*   Updated: 2024/03/09 21:28:27 by abounab          ###   ########.fr       */
+/*   Updated: 2024/03/10 16:25:19 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,6 @@ typedef struct s_details{
 }	t_details;
 
 int	valid_file(char *name, char *fdf, int len);
-
-int	valid_axis(char *file, t_details ***map);
 
 void	free_arr(char **arr, int len);
 void free_axis(t_details ***map);
@@ -56,8 +54,7 @@ char	**ft_split_space(char *str, int *len);
 
 int extract_axis(char *ligne, t_details ***map, int min_width, int x);
 
-int	valid_axis(char *file, t_details ***map);
+int   valid_axis(char *file, t_details ****map);
 
-int	valid_file(char *name, char *fdf, int len);
 
 #endif

@@ -1,6 +1,6 @@
 CC = cc
 
-SRCS = main.c
+SRCS = main.c get_next_line.c get_next_line_utils.c
 
 SRCS_OBJ = ${SRCS:.c=.o}
 
@@ -25,7 +25,7 @@ endif
 
 all: $(NAME)
 
-%.o: %.c
+%.o: %.c fdf.h get_next_line.h
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@ 
 
 $(NAME): $(SRCS_OBJ)

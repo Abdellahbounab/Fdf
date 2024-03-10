@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/03/09 22:50:52 by abounab          ###   ########.fr       */
+/*   Updated: 2024/03/10 19:29:12 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,13 +62,17 @@ int	ft_atox(char *str ,int *i)
 	int	num;
 	int	val;
 	char *hexa;
+	char *hexa_maj;
 
 	num = 0;
 	*i += 2;
 	hexa = "0123456789abcdef";
+	hexa_maj = "0123456789ABCDEF";
 	while (str && str[*i])
 	{
 		val = ft_strchr(hexa ,str[*i]);
+		if (val == -1)
+			val = ft_strchr(hexa_maj, str[*i]);
 		if (val > -1)
 		{
 			num *= 16;
@@ -122,7 +126,7 @@ int	get_value(char *str, int *i) //have to implements the hexa part
 	num = 0;
 	if (str[*i] == ',')
 		(*i)++;
-	if (ft_strlen(str) > 2 && ft_strncmp(str, "0x", 2))
+	if (ft_strlen(str) == 8  && ft_strncmp(str, "0x", 1))
 		num = ft_atox(str, i);
 	else
 		num = ft_atoi(str, i);
@@ -143,9 +147,9 @@ t_details *get_data(char *str, int x_val, int y_val)
 		axis->z = get_value(str, &i); //get value would get the number in hexa or decimal (if error assign to 0, (white color is a default color))
 		axis->color = 0xFFFFFF; //default color (white)
 		axis->opacity = 100;
-		if (str[i])
+		if (str && str[i])
 			axis->color = get_value(str, &i);
-		if (str[i])
+		if (str && str[i])
 			axis->opacity = get_value(str, &i);//opacity would be activated only if bonus part is maked
 		return (axis);
 	}
@@ -254,24 +258,24 @@ int extract_axis(char *ligne, t_details ***map, int min_width, int x)
 	char **arr;
 	int	y;
 	int len;
+	t_details **cpy;
 
 	y = 0;
 	//gettin every line data into the map : *map[j] (malloced)
 	arr = ft_split_space(ligne, &len);
 	if (len >= min_width)
 	{
-		*map = (t_details **) malloc (sizeof(t_details *) * len);
-		if (!arr)
-			return (free(map), free_arr(arr, len), 0);
-		while (arr[y])
+		cpy = (t_details **) malloc (sizeof(t_details *) * len);
+		if (!cpy)
+			return (free_arr(arr, len), 0);
+		while (y < len)
 		{
-			printf("str : %d (", y);
-			*map[y] = get_data(arr[y], x, y);
-			if (!*map[y])
+			cpy[y] = get_data(arr[y], x, y);
+			if (!cpy)
 				return (free_arr(arr, len), free_axis(map), 0);
-			printf("extract_axis(%d, %d, %d)\n", (*map[y])->x, (*map[y])->y, (*map[y])->z);
 			y++;
 		}
+		*map = cpy;
 		return (free_arr(arr, len), 1);
 	}
 	return (0);
@@ -288,34 +292,51 @@ void clear_map(t_details ***map, int len)
 	}
 }
 
-int	valid_axis(char *file, t_details ***map)
+int count_lignes(char *file)
+{
+	int fd = open (file, O_RDONLY);
+	int len;
+
+	len = 0;
+	if (fd != -1)
+	{
+		while (get_next_line(fd))
+			len++;
+	}
+	close(fd);
+	return (0);
+}
+
+int	valid_axis(char *file, t_details ****map)
 {
 	int		fd;
 	int		min_width;
 	char	*ligne;
 	int		i;
+	t_details ***cpy;
 
 	i = 0;
+	cpy = (t_details ***) malloc (sizeof(t_details **) * count_lignes(file));
 	fd = open(file, O_RDONLY);
 	ligne = get_next_line(fd);
-	min_width = words_count(ligne);//get the number of elements in the first line after checking valid digits && hexa for colors
-	// printf("min width : %d\n", min_width);
+	min_width = words_count(ligne);
 	while (ligne && *ligne)
 	{
-		// check if map have the same width length as the first line or higher : if less == error
-		// check if map is only digits && colors hexa or decimal && insert the data required depends on its x, y, z
-		if (extract_axis(ligne, &map[i], min_width, i))
+		if (extract_axis(ligne, &cpy[i], min_width, i))
 		{
+			// printf("(%s)", ligne);
 			free(ligne);
-			printf("valid_axis: (%d, %d, %d)\n", map[i][0]->x, map[i][0]->y,map[i][0]->z);
+			ligne = NULL;
+			// printf("valid_axis: (%d, %d, %d, %d)\n", cpy[i][0]->x, cpy[i][0]->y, cpy[i][0]->z, cpy[i][0]->color);
 			ligne = get_next_line(fd);
 		}
 		else    //freeing all malloced axises before exit
-			return (printf("error extract\n"), free(ligne), clear_map(map, i - 1), ft_errno(), 0);
+			return (printf("error extract\n"), free(ligne), clear_map(*map, i - 1), ft_errno(), 0);
 		i++;	
 	}
 	if (!min_width)
 		return (free(ligne), ft_errno(), 0);
+	*map = cpy;
 	return (1);
 }
 
@@ -335,12 +356,12 @@ int	valid_file(char *name, char *fdf, int len)
 
 int	main(int argc, char **argv)
 {
-	// void	*mlx;
-	// void	*mlx_win;
-	t_details	**map;
+	void	*mlx;
+	void	*mlx_win;
+	t_details	***map;
 
-
-	//starting point :
+	map = NULL;
+	// starting point :
 			// 1 - validate .fdf file from argv[1]
 			// 2 - check map : get all lines length as the first one
 			// 3 - get details from the map (matrices of [x(width)][y(length)]) and getting the axis z
@@ -352,10 +373,22 @@ int	main(int argc, char **argv)
 	{
 		if (valid_file(argv[1], ".fdf", ft_strlen(argv[1]))) // check file if end with .fdf , if exist, if permissions
 		{
-			// check if map have the same width length as the first line or higher : if less == error
+	// 		// check if map have the same width length as the first line or higher : if less == error
 			if (valid_axis(argv[1], &map)) // check if map is only digits && colors hexa or decimial && insert the data required depends on its x, y, z
 			{
-				// using the lib mlx to draw the lines that i got from map[][]
+	// 			// using the lib mlx to draw the lines that i got from map[][]
+				mlx = mlx_init();
+				int i = 0;
+				// printf("map[0][0]:%d\n", map[0][0]->z);
+				while (i < 10)
+				{
+					mlx_win = mlx_new_window(mlx, 500, 500, "Abounab");
+					// draw_line(mlx, mlx_win, map[i][0], 500, 0, 0, 0xFFFFFF);
+					mlx_pixel_put(mlx, mlx_win, 255, 255, map[i][0]->color);
+					printf("(%d)", map[i][0]->z);
+					i++;
+					mlx_loop(mlx);
+				}
 				printf("done\n");
 			}
 		}
