@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/03/10 19:29:12 by abounab          ###   ########.fr       */
+/*   Updated: 2024/03/11 20:10:25 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,10 @@ void	free_arr(char **arr, int len)
 
 	i = 0;
 	while (arr && i < len)
-		free(arr[i++]);
+	{
+		free(arr[i]);
+		i++;
+	}
 }
 
 int	ft_strncmp(char *str, char *cmp, int len)
@@ -57,22 +60,24 @@ int	ft_strchr(char *str, unsigned char c)
 	return (-1);
 }
 
-int	ft_atox(char *str ,int *i)
+int	ft_atox(char *str)
 {
 	int	num;
 	int	val;
+	int i;
 	char *hexa;
 	char *hexa_maj;
 
 	num = 0;
-	*i += 2;
+	i = 0;
 	hexa = "0123456789abcdef";
 	hexa_maj = "0123456789ABCDEF";
-	while (str && str[*i])
+	while (str && str[i] && i < 6)
 	{
-		val = ft_strchr(hexa ,str[*i]);
-		if (val == -1)
-			val = ft_strchr(hexa_maj, str[*i]);
+		if (str[i] >= 'A' && str[i] <= 'F')
+			val = ft_strchr(hexa ,str[i]);
+		else
+			val = ft_strchr(hexa_maj, str[i]);
 		if (val > -1)
 		{
 			num *= 16;
@@ -80,111 +85,111 @@ int	ft_atox(char *str ,int *i)
 		}
 		else
 			break;
-		(*i)++;
+		i++;
 	}
-	if (str && str[*i] && (str[*i] != ' ' || str[*i] != '\t'))
+	printf("num : %d\n", num);
+	if (str && str[i] && (str[i] != ' ' || str[i] != '\t'))
 		num = 0;
-	while (str && str[*i] && (str[*i] == ' ' || str[*i] == '\t'))
-		(*i)++;
+	while (str && str[i] && (str[i] == ' ' || str[i] == '\t'))
+		i++;
 	return (num);
 }
 
-int	ft_atoi(char *str ,int *i)
+int	ft_atoi(char *str)
 {
 	int	num;
 	int	sign;
+	int i;
 
 	num = 0;
 	sign = 1;
-	if (str && (str[*i] == '-' || str[*i] == '+'))
+	i = 0;
+	if (str && (str[i] == '-' || str[i] == '+'))
 	{
-		if (str[*i] == '-')
+		if (str[i] == '-')
 			sign = -1;
-		(*i)++;
+		i++;
 	}
-	while (str && str[*i] && str[*i] >= '0' && str[*i] <= '9')
+	while (str && str[i] && str[i] >= '0' && str[i] <= '9')
 	{
 		num *= 10;
-		num += str[*i] - '0';
-		(*i)++;
+		num += str[i] - '0';
+		i++;
 	}
-	if (str && str[*i] && (str[*i] != ' ' || str[*i] != '\t'))
+	if (str && str[i] && (str[i] != ' ' || str[i] != '\t'))
 		num = 0;
-	while (str && str[*i] && (str[*i] == ' ' || str[*i] == '\t'))
-		(*i)++;
+	while (str && str[i] && (str[i] == ' ' || str[i] == '\t'))
+		i++;
 	return (num * sign);
 }
 
-int	get_value(char *str, int *i) //have to implements the hexa part
+int	get_value(char *str) //have to implements the hexa part
 {
-	int val;
-	int sign;
 	int num;
 
-	val = 0;
-	sign = 1;
 	num = 0;
-	if (str[*i] == ',')
-		(*i)++;
-	if (ft_strlen(str) == 8  && ft_strncmp(str, "0x", 1))
-		num = ft_atox(str, i);
+	if (ft_strncmp(str, "0x", 1))
+		num = ft_atox(str);
 	else
-		num = ft_atoi(str, i);
+		num = ft_atoi(str);
 	return (num);
 }
 
 t_details *get_data(char *str, int x_val, int y_val)
 {
 	t_details *axis;
-	int	i;
+	char **arr;
+	int	len;
 
-	i = 0;
+	len = 0;
+	arr = ft_split_space(str, ",", &len);
+	// printf("len data:%d(%s)\n", len, str);
 	axis = (t_details *) malloc (sizeof(t_details));
-	if (axis)
+	if (axis && arr && len)
 	{
+		// printf("len : %d\n", len);
 		axis->x = x_val;
 		axis->y = y_val;
-		axis->z = get_value(str, &i); //get value would get the number in hexa or decimal (if error assign to 0, (white color is a default color))
+		printf("arr[0]: %s\n",arr[0]);
+		axis->z = get_value(arr[0]); //get value would get the number in hexa or decimal (if error assign to 0, (white color is a default color))
 		axis->color = 0xFFFFFF; //default color (white)
 		axis->opacity = 100;
-		if (str && str[i])
-			axis->color = get_value(str, &i);
-		if (str && str[i])
-			axis->opacity = get_value(str, &i);//opacity would be activated only if bonus part is maked
+		if (len > 1)
+			axis->color = get_value(arr[1]);
+		if (len > 2)
+			axis->opacity = get_value(arr[2]);//opacity would be activated only if bonus part is maked
 		return (axis);
 	}
 	return (NULL);
 }
 
-int	words_count(char *str)
+int	words_count(char *str, char *charset)
 {
 	int	len;
 
 	len = 0;
-	if (*str && (*str != ' ' && *str != '\t' && *str != '\n'))
+	if (*str && ft_strchr(charset, *str) != -1)
 	{
 		len++;
 		str++;
 	}
 	while (*str)
 	{
-		if (*str && (*str != ' ' && *str != '\t' && *str != '\n')
-			&& ((*(str - 1) == ' ') || (*(str - 1) == '\t') 
-				|| (*(str - 1) == '\n')))
+		if (*str && ft_strchr(charset, *str) > -1 && ft_strchr(charset , *(str - 1)) == -1)
 			len++;
 		str++;
 	}
 	return (len);
 }
 
-int	word_len(char **str)
+int	word_len(char **str, char *charset)
 {
 	int	len;
 
 	len = 0;
-	while (*str && (**str == ' ' || **str == '\t' || **str == '\n'))
+	while (*str && ft_strchr(charset, **str) != -1)
 		(*str)++;
-	while (**str && **str != ' ' && **str != '\t' && **str != '\n')
+	while (**str && ft_strchr(charset, **str) == -1)
 	{
 		(*str)++;
 		len++;
@@ -210,25 +215,25 @@ char	*ft_strdups(char *str, int len)
 	return (cpy);
 }
 
-char	**ft_split_space(char *str, int *len)
+char	**ft_split_space(char *str, char *charset, int *len)
 {
 	char	**arr;
 	int		i;
 
 	i = 0;
-	*len = words_count(str);
-	if (len)
+	*len = words_count(str, charset);
+	if (str && *len)
 	{
 		arr = (char **) malloc (sizeof(char *) * (*len + 1));
 		if (!arr)
 			return (NULL);
-		while (*str && i < *len)
+		while (str && *str && i < *len)
 		{
-			while (*str && (*str == ' ' || *str == '\t' || *str == '\n'))
+			while (*str && ft_strchr(charset, *str) != -1)
 				str++;
 			if (*str)
 			{
-				*(arr + i) = ft_strdups(str, word_len(&str));
+				*(arr + i) = ft_strdups(str, word_len(&str, charset));
 				if (!*(arr + i))
 					return (free_arr(arr, i), NULL);
 				i++;
@@ -261,8 +266,8 @@ int extract_axis(char *ligne, t_details ***map, int min_width, int x)
 	t_details **cpy;
 
 	y = 0;
-	//gettin every line data into the map : *map[j] (malloced)
-	arr = ft_split_space(ligne, &len);
+	len = 0;
+	arr = ft_split_space(ligne, " \t\n\0",&len);
 	if (len >= min_width)
 	{
 		cpy = (t_details **) malloc (sizeof(t_details *) * len);
@@ -273,6 +278,7 @@ int extract_axis(char *ligne, t_details ***map, int min_width, int x)
 			cpy[y] = get_data(arr[y], x, y);
 			if (!cpy)
 				return (free_arr(arr, len), free_axis(map), 0);
+			// printf("cpyz : %d\n", cpy[y]->z);
 			y++;
 		}
 		*map = cpy;
@@ -319,7 +325,7 @@ int	valid_axis(char *file, t_details ****map)
 	cpy = (t_details ***) malloc (sizeof(t_details **) * count_lignes(file));
 	fd = open(file, O_RDONLY);
 	ligne = get_next_line(fd);
-	min_width = words_count(ligne);
+	min_width = words_count(ligne, " ");
 	while (ligne && *ligne)
 	{
 		if (extract_axis(ligne, &cpy[i], min_width, i))
@@ -327,7 +333,7 @@ int	valid_axis(char *file, t_details ****map)
 			// printf("(%s)", ligne);
 			free(ligne);
 			ligne = NULL;
-			// printf("valid_axis: (%d, %d, %d, %d)\n", cpy[i][0]->x, cpy[i][0]->y, cpy[i][0]->z, cpy[i][0]->color);
+			printf("valid_axis: (%d, %d, %d, %d)\n", cpy[i][0]->x, cpy[i][0]->y, cpy[i][0]->z, cpy[i][0]->color);
 			ligne = get_next_line(fd);
 		}
 		else    //freeing all malloced axises before exit
@@ -356,8 +362,8 @@ int	valid_file(char *name, char *fdf, int len)
 
 int	main(int argc, char **argv)
 {
-	void	*mlx;
-	void	*mlx_win;
+	// void	*mlx;
+	// void	*mlx_win;
 	t_details	***map;
 
 	map = NULL;
@@ -377,17 +383,17 @@ int	main(int argc, char **argv)
 			if (valid_axis(argv[1], &map)) // check if map is only digits && colors hexa or decimial && insert the data required depends on its x, y, z
 			{
 	// 			// using the lib mlx to draw the lines that i got from map[][]
-				mlx = mlx_init();
+				// mlx = mlx_init();
 				int i = 0;
 				// printf("map[0][0]:%d\n", map[0][0]->z);
-				while (i < 10)
+				// mlx_win = mlx_new_window(mlx, 500, 500, "Abounab");
+				while (i < 14)
 				{
-					mlx_win = mlx_new_window(mlx, 500, 500, "Abounab");
 					// draw_line(mlx, mlx_win, map[i][0], 500, 0, 0, 0xFFFFFF);
-					mlx_pixel_put(mlx, mlx_win, 255, 255, map[i][0]->color);
-					printf("(%d)", map[i][0]->z);
+					// mlx_pixel_put(mlx, mlx_win, 255, 255, map[i][0]->color);
+					printf("(%d)", map[i][0]->color);
 					i++;
-					mlx_loop(mlx);
+					// mlx_loop(mlx);
 				}
 				printf("done\n");
 			}

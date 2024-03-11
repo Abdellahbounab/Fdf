@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/09 18:43:35 by abounab           #+#    #+#             */
-/*   Updated: 2024/03/10 16:25:19 by abounab          ###   ########.fr       */
+/*   Updated: 2024/03/11 18:53:21 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,19 +38,19 @@ int	ft_strncmp(char *str, char *cmp, int len);
 
 int	ft_strchr(char *str, unsigned char c);
 
-int	ft_atox(char *str ,int *i);
+int	ft_atox(char *str);
 
-int	ft_atoi(char *str ,int *i);
+int	ft_atoi(char *str);
 
-int	get_value(char *str, int *i); //have to implements the hexa part
+int	get_value(char *str); //have to implements the hexa part
 
 t_details *get_data(char *str, int x_val, int y_val);
 
-int	words_count(char *str);
+int	words_count(char *str, char *charset);
 
 char	*ft_strdups(char *str, int len);
 
-char	**ft_split_space(char *str, int *len);
+char	**ft_split_space(char *str, char *charset, int *len);
 
 int extract_axis(char *ligne, t_details ***map, int min_width, int x);
 
