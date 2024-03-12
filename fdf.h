@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Fdf.h                                              :+:      :+:    :+:   */
+/*   fdf.h                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -49,7 +49,7 @@ t_details *get_data(char *str, int x_val, int y_val, int len);
 
 int	words_count(char *str, char *charset);
 
-char	*ft_strdups(char *str, int len);
+char	*ft_strdups(char **str, int len);
 
 char	**ft_split_space(char *str, char *charset, int *len);
 

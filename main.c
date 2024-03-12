@@ -176,17 +176,20 @@ t_details *get_data(char *str, int x_val, int y_val, int arr_len)
 	int	len;
 
 	len = 0;
-	arr = ft_split_space(str, ",\0", &len);
-	axis = (t_details *) malloc (sizeof(t_details));
-	if (axis && arr && len)
+	arr = ft_split_space(str, " ,", &len);
+	if (arr && len)
 	{
 		axis = create_data(x_val, y_val, arr_len);
-		axis->z = get_value(arr[0]); //get value would get the number in hexa or decimal (if error assign to 0, (white color is a default color))
-		if (len > 1)
-			axis->color = get_value(arr[1]);
-		if (len > 2)
-			axis->opacity = get_value(arr[2]);//opacity would be activated only if bonus part is maked
-		return (axis);
+		if (axis)
+		{
+			axis->z = get_value(arr[0]); //get value would get the number in hexa or decimal (if error assign to 0, (white color is a default color))
+			if (len > 1)
+				axis->color = get_value(arr[1]);
+			if (len > 2)
+				axis->opacity = get_value(arr[2]);//opacity would be activated only if bonus part is maked
+			return (axis);
+		}
+		return (NULL);
 	}
 	return (NULL);
 }
@@ -210,22 +213,22 @@ int	words_count(char *str, char *charset)
 	return (len);
 }
 
-int	word_len(char **str, char *charset)
+int	word_len(char *str, char *charset)
 {
 	int	len;
 
 	len = 0;
-	while (*str && ft_strchr(charset, **str) != -1)
-		(*str)++;
-	while (**str && ft_strchr(charset, **str) == -1)
+	while (*str && ft_strchr(charset, *str) != -1)
+		str++;
+	while (*str && ft_strchr(charset, *str) == -1)
 	{
-		(*str)++;
+		str++;
 		len++;
 	}
 	return (len);
 }
 
-char	*ft_strdups(char *str, int len)
+char	*ft_strdups(char **str, int len)
 {
 	char	*cpy;
 	int		i;
@@ -234,9 +237,9 @@ char	*ft_strdups(char *str, int len)
 	cpy = (char *) malloc (sizeof(char) * (len + 1));
 	if (!cpy)
 		return (NULL);
-	while (i < len)
+	while (*str && i < len)
 	{
-		*(cpy + i) = *(str + i);
+		*(cpy + i) = *(*str)++;
 		i++;
 	}
 	*(cpy + i) = 0;
@@ -255,13 +258,14 @@ char	**ft_split_space(char *str, char *charset, int *len)
 		arr = (char **) malloc (sizeof(char *) * (*len + 1));
 		if (!arr)
 			return (NULL);
+		
 		while (str && *str && i < *len)
 		{
 			while (*str && ft_strchr(charset, *str) != -1)
 				str++;
 			if (*str)
 			{
-				*(arr + i) = ft_strdups(str, word_len(&str, charset));
+				*(arr + i) = ft_strdups(&str, word_len(str, charset));
 				if (!*(arr + i))
 					return (free_arr(arr, i), NULL);
 				i++;
@@ -323,7 +327,7 @@ void clear_map(t_details ***map, int len)
 	i = 0;
 	while (i < len)
 	{
-		printf("(%d)\n", (*map[i])->length);
+		// printf("(%d)\n", (*map[i])->length);
 		free_axis(&map[i], (*map[i])->length);
 		i++;
 	}
@@ -343,6 +347,8 @@ int count_lignes(char *file)
 		while (str)
 		{
 			len++;
+			free(str);
+			str = NULL;
 			str = get_next_line(fd);
 		}
 	}
@@ -362,18 +368,18 @@ int	valid_axis(char *file, t_details ****map)
 	cpy = (t_details ***) malloc (sizeof(t_details **) * count_lignes(file));
 	fd = open(file, O_RDONLY);
 	ligne = get_next_line(fd);
-	min_width = words_count(ligne, " \0");
+	min_width = words_count(ligne, " \t");
 	while (ligne && *ligne)
 	{
 		if (extract_axis(ligne, &cpy[i], min_width, i))
 		{
+			read_map(cpy[i]);
 			free(ligne);
 			ligne = NULL;
 			ligne = get_next_line(fd);
 		}
 		else
 			return (printf("error extract\n"), free(ligne), clear_map(cpy, i), ft_errno(), 0);
-		read_map(cpy[i]);
 		i++;	
 	}
 	if (!min_width)
