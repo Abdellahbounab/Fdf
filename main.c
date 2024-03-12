@@ -6,11 +6,26 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/03/11 20:10:25 by abounab          ###   ########.fr       */
+/*   Updated: 2024/03/12 15:54:10 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fdf.h"
+
+void read_map(t_details **map)
+{
+	int i = 0;
+	int len = 0;
+	
+	if (map[0])
+		len = map[0]->length;
+	while(i < len)
+	{
+		printf("(%d, %d, %d)", map[i]->z, map[i]->x, map[i]->y);
+		i++;
+	}
+	printf("\n");
+}
 
 void ft_errno(void)
 {
@@ -23,11 +38,12 @@ void	free_arr(char **arr, int len)
 	int	i;
 
 	i = 0;
-	while (arr && i < len)
+	while (arr && arr[i] && i < len)
 	{
 		free(arr[i]);
 		i++;
 	}
+	free(arr);
 }
 
 int	ft_strncmp(char *str, char *cmp, int len)
@@ -46,6 +62,7 @@ int	ft_strncmp(char *str, char *cmp, int len)
 	return (0);
 }
 
+//if found = i else -1
 int	ft_strchr(char *str, unsigned char c)
 {
 	int	i;
@@ -69,15 +86,15 @@ int	ft_atox(char *str)
 	char *hexa_maj;
 
 	num = 0;
-	i = 0;
+	i = 2;
 	hexa = "0123456789abcdef";
 	hexa_maj = "0123456789ABCDEF";
-	while (str && str[i] && i < 6)
+	while (str && str[i] && i < 8)
 	{
 		if (str[i] >= 'A' && str[i] <= 'F')
-			val = ft_strchr(hexa ,str[i]);
+			val = ft_strchr(hexa_maj ,str[i]);
 		else
-			val = ft_strchr(hexa_maj, str[i]);
+			val = ft_strchr(hexa, str[i]);
 		if (val > -1)
 		{
 			num *= 16;
@@ -87,7 +104,7 @@ int	ft_atox(char *str)
 			break;
 		i++;
 	}
-	printf("num : %d\n", num);
+	// printf("num : %d\n", num);
 	if (str && str[i] && (str[i] != ' ' || str[i] != '\t'))
 		num = 0;
 	while (str && str[i] && (str[i] == ' ' || str[i] == '\t'))
@@ -123,7 +140,7 @@ int	ft_atoi(char *str)
 	return (num * sign);
 }
 
-int	get_value(char *str) //have to implements the hexa part
+int	  get_value(char *str) //have to implements the hexa part
 {
 	int num;
 
@@ -135,25 +152,36 @@ int	get_value(char *str) //have to implements the hexa part
 	return (num);
 }
 
-t_details *get_data(char *str, int x_val, int y_val)
+t_details *create_data(int x_val, int y_val, int arr_len)
+{
+	t_details *axis;
+
+	axis = (t_details *) malloc (sizeof(t_details));
+	if (axis)
+	{	
+		axis->x = x_val;
+		axis->y = y_val;
+		axis->z = 0; //get value would get the number in hexa or decimal (if error assign to 0, (white color is a default color))
+		axis->color = 0xFFFFFF; //default color (white)
+		axis->opacity = 100;
+		axis->length = arr_len;
+	}
+	return (axis);
+}
+
+t_details *get_data(char *str, int x_val, int y_val, int arr_len)
 {
 	t_details *axis;
 	char **arr;
 	int	len;
 
 	len = 0;
-	arr = ft_split_space(str, ",", &len);
-	// printf("len data:%d(%s)\n", len, str);
+	arr = ft_split_space(str, ",\0", &len);
 	axis = (t_details *) malloc (sizeof(t_details));
 	if (axis && arr && len)
 	{
-		// printf("len : %d\n", len);
-		axis->x = x_val;
-		axis->y = y_val;
-		printf("arr[0]: %s\n",arr[0]);
+		axis = create_data(x_val, y_val, arr_len);
 		axis->z = get_value(arr[0]); //get value would get the number in hexa or decimal (if error assign to 0, (white color is a default color))
-		axis->color = 0xFFFFFF; //default color (white)
-		axis->opacity = 100;
 		if (len > 1)
 			axis->color = get_value(arr[1]);
 		if (len > 2)
@@ -168,14 +196,14 @@ int	words_count(char *str, char *charset)
 	int	len;
 
 	len = 0;
-	if (*str && ft_strchr(charset, *str) != -1)
+	if (*str && ft_strchr(charset, *str) == -1)
 	{
 		len++;
 		str++;
 	}
 	while (*str)
 	{
-		if (*str && ft_strchr(charset, *str) > -1 && ft_strchr(charset , *(str - 1)) == -1)
+		if (*str && ft_strchr(charset, *str) == -1 && ft_strchr(charset , *(str - 1)) != -1)
 			len++;
 		str++;
 	}
@@ -244,18 +272,20 @@ char	**ft_split_space(char *str, char *charset, int *len)
 	return (0);
 }
 
-void free_axis(t_details ***map)
+void free_axis(t_details ***map, int len)
 {
 	int i;
 
 	i = 0;
-	while (*map && *map[i])
+	while (*map && i < len)
 	{
+		// printf("(%d, %d, %d, %d)", (*map[i])->x, (*map[i])->y, (*map[i])->z, (*map[i])->color);
 		free(*map[i]);
 		*map[i] = NULL;
-		i++;
 		printf("i : %d\n", i);
+		i++;
 	}
+	printf("\n");
 }
 
 int extract_axis(char *ligne, t_details ***map, int min_width, int x)
@@ -275,16 +305,15 @@ int extract_axis(char *ligne, t_details ***map, int min_width, int x)
 			return (free_arr(arr, len), 0);
 		while (y < len)
 		{
-			cpy[y] = get_data(arr[y], x, y);
+			cpy[y] = get_data(arr[y], x, y, len);
 			if (!cpy)
-				return (free_arr(arr, len), free_axis(map), 0);
-			// printf("cpyz : %d\n", cpy[y]->z);
+				return (free_arr(arr, len), free_axis(&cpy, len), 0);
 			y++;
 		}
 		*map = cpy;
 		return (free_arr(arr, len), 1);
 	}
-	return (0);
+	return (free_arr(arr, len), 0);
 }
 
 void clear_map(t_details ***map, int len)
@@ -294,20 +323,28 @@ void clear_map(t_details ***map, int len)
 	i = 0;
 	while (i < len)
 	{
-		free_axis(&map[i]);
+		printf("(%d)\n", (*map[i])->length);
+		free_axis(&map[i], (*map[i])->length);
+		i++;
 	}
 }
 
 int count_lignes(char *file)
 {
-	int fd = open (file, O_RDONLY);
+	int fd ;
 	int len;
+	char *str;
 
 	len = 0;
+	fd = open (file, O_RDONLY);
+	str = get_next_line(fd);
 	if (fd != -1)
 	{
-		while (get_next_line(fd))
+		while (str)
+		{
 			len++;
+			str = get_next_line(fd);
+		}
 	}
 	close(fd);
 	return (0);
@@ -325,19 +362,18 @@ int	valid_axis(char *file, t_details ****map)
 	cpy = (t_details ***) malloc (sizeof(t_details **) * count_lignes(file));
 	fd = open(file, O_RDONLY);
 	ligne = get_next_line(fd);
-	min_width = words_count(ligne, " ");
+	min_width = words_count(ligne, " \0");
 	while (ligne && *ligne)
 	{
 		if (extract_axis(ligne, &cpy[i], min_width, i))
 		{
-			// printf("(%s)", ligne);
 			free(ligne);
 			ligne = NULL;
-			printf("valid_axis: (%d, %d, %d, %d)\n", cpy[i][0]->x, cpy[i][0]->y, cpy[i][0]->z, cpy[i][0]->color);
 			ligne = get_next_line(fd);
 		}
-		else    //freeing all malloced axises before exit
-			return (printf("error extract\n"), free(ligne), clear_map(*map, i - 1), ft_errno(), 0);
+		else
+			return (printf("error extract\n"), free(ligne), clear_map(cpy, i), ft_errno(), 0);
+		read_map(cpy[i]);
 		i++;	
 	}
 	if (!min_width)
@@ -362,8 +398,6 @@ int	valid_file(char *name, char *fdf, int len)
 
 int	main(int argc, char **argv)
 {
-	// void	*mlx;
-	// void	*mlx_win;
 	t_details	***map;
 
 	map = NULL;
@@ -382,19 +416,6 @@ int	main(int argc, char **argv)
 	// 		// check if map have the same width length as the first line or higher : if less == error
 			if (valid_axis(argv[1], &map)) // check if map is only digits && colors hexa or decimial && insert the data required depends on its x, y, z
 			{
-	// 			// using the lib mlx to draw the lines that i got from map[][]
-				// mlx = mlx_init();
-				int i = 0;
-				// printf("map[0][0]:%d\n", map[0][0]->z);
-				// mlx_win = mlx_new_window(mlx, 500, 500, "Abounab");
-				while (i < 14)
-				{
-					// draw_line(mlx, mlx_win, map[i][0], 500, 0, 0, 0xFFFFFF);
-					// mlx_pixel_put(mlx, mlx_win, 255, 255, map[i][0]->color);
-					printf("(%d)", map[i][0]->color);
-					i++;
-					// mlx_loop(mlx);
-				}
 				printf("done\n");
 			}
 		}

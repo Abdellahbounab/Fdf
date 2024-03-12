@@ -4,7 +4,7 @@ SRCS = main.c get_next_line.c get_next_line_utils.c
 
 SRCS_OBJ = ${SRCS:.c=.o}
 
-NAME = Fdf
+NAME = fdf
 
 UNAME = ${shell uname}
 
