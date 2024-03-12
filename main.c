@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/03/12 22:11:38 by abounab          ###   ########.fr       */
+/*   Updated: 2024/03/12 23:42:26 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -366,6 +366,7 @@ t_details	***valid_axis(char *file)
 		*(cpy + i) = extract_axis(ligne, min_width, i);
 		if (!(*(cpy + i)))
 			return (free(ligne), clear_map(cpy, i - 1), ft_errno(), NULL);
+		read_map(cpy[i]);
 		free(ligne);
 		ligne = NULL;
 		ligne = get_next_line(fd);
@@ -396,10 +397,10 @@ int	main(int argc, char **argv)
 
 	map = NULL;
 	// starting point :
-			// 1 - validate .fdf file from argv[1]
-			// 2 - check map : get all lines length as the first one
-			// 3 - get details from the map (matrices of [x(width)][y(length)]) and getting the axis z
-			// 3 - handle the hexa or decimal colors in each point
+			// 1 - validate .fdf file from argv[1]   VALIDE
+			// 2 - check map : get all lines length as the first one	VALIDE
+			// 3 - get details from the map (matrices of [x(width)][y(length)]) and getting the axis z	VALDIE
+			// 3 - handle the hexa or decimal colors in each point	VALIDE
 			// 4 - draw the points inside the mlx while connecting every point with its (x - 1) (x + 1) (y + 1) (y - 1)
 			// 5 - rending colors with every points
 	
@@ -419,6 +420,7 @@ int	main(int argc, char **argv)
 	}
 
 
+	// knowledge : https://github.com/VBrazhnik/FdF/wiki
 
 
 	//about map :
