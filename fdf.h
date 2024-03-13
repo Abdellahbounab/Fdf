@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/09 18:43:35 by abounab           #+#    #+#             */
-/*   Updated: 2024/03/12 21:11:26 by abounab          ###   ########.fr       */
+/*   Updated: 2024/03/13 17:55:03 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,13 @@ typedef struct s_details{
 	int length;
 }	t_details;
 
+typedef struct s_mlx_data{
+	void *mlx_ptr;
+	void *mlx_window;
+	int	x_map;
+	int	y_map;
+} t_mlx_data;
+
 int	valid_file(char *name, char *fdf, int len);
 
 void	free_arr(char **arr, int len);
@@ -43,7 +50,7 @@ int	ft_atox(char *str);
 
 int	ft_atoi(char *str);
 
-int	get_value(char *str); //have to implements the hexa part
+int	get_value(char *str);
 
 t_details *get_data(char *str, int x_val, int y_val, int len);
 
@@ -55,7 +62,7 @@ char	**ft_split_space(char *str, char *charset, int *len);
 
 t_details **extract_axis(char *ligne, int min_width, int x);
 
-t_details	***valid_axis(char *file);
+t_details	***valid_axis(char *file, int *x_map, int *y_map);
 
 
 #endif

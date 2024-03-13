@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/03/12 23:42:26 by abounab          ###   ########.fr       */
+/*   Updated: 2024/03/13 23:33:23 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -346,7 +346,7 @@ int count_lignes(char *file)
 	return (len);
 }
 
-t_details	***valid_axis(char *file)
+t_details	***valid_axis(char *file, int *x_map, int *y_map)
 {
 	int		fd;
 	int		min_width;
@@ -374,7 +374,7 @@ t_details	***valid_axis(char *file)
 	}
 	if (!min_width)
 		return (free(ligne), ft_errno(), NULL);
-	return (cpy);
+	return (*x_map = min_width, *y_map = i, cpy);
 }
 
 int	valid_file(char *name, char *fdf, int len)
@@ -394,6 +394,8 @@ int	valid_file(char *name, char *fdf, int len)
 int	main(int argc, char **argv)
 {
 	t_details	***map;
+	t_mlx_data mlx;
+
 
 	map = NULL;
 	// starting point :
@@ -409,9 +411,10 @@ int	main(int argc, char **argv)
 		if (valid_file(argv[1], ".fdf", ft_strlen(argv[1]))) // check file if end with .fdf , if exist, if permissions
 		{
 	// 		// check if map have the same width length as the first line or higher : if less == error
-			map = valid_axis(argv[1]);
+			map = valid_axis(argv[1], &mlx.x_map, &mlx.y_map);
 			if (map) // check if map is only digits && colors hexa or decimial && insert the data required depends on its x, y, z
 			{
+				 
 				printf("done\n");
 			}
 		}
@@ -419,6 +422,17 @@ int	main(int argc, char **argv)
 			printf("error : file error\n");
 	}
 
+	mlx.mlx_ptr = mlx_init();
+	if (!mlx.mlx_ptr)
+		ft_errno();
+		//here where i got width and length of data map and i have to update it before assign it to the widnow
+	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, mlx.x_map, mlx.y_map, "FDF");
+	mlx_loop(mlx.mlx_ptr);
+	mlx_destroy_window(mlx.mlx_ptr, mlx.mlx_window);
+	free(mlx.mlx_ptr);
+	free(mlx.mlx_window);
+	
+	//adding valgrind to my linux ! to rememeber
 
 	// knowledge : https://github.com/VBrazhnik/FdF/wiki
 
