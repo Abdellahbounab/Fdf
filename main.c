@@ -391,6 +391,31 @@ int	valid_file(char *name, char *fdf, int len)
 	return (0);
 }
 
+int draw_line(t_mlx_data data, int x1, int y1, int x2, int y2, int color)
+{
+	int diff_x;
+	int diff_y;
+	int x_i;
+	int y_i;
+	int steps;
+
+	diff_x = abs(x2 - x1);
+	diff_y = abs(y2 - y1);
+	if (abs(diff_x) > abs(diff_y))
+		steps = abs(diff_x);
+	else
+		steps = abs(diff_y);
+	x_i = diff_x / steps;
+	y_i = diff_y / steps;
+	while (steps--)
+	{
+		mlx_pixel_put(data.mlx_ptr, data.mlx_window, x1, y2, color);
+		x1 += x_i;
+		y1 += y_i;
+	}
+	return (1);
+}
+
 int	main(int argc, char **argv)
 {
 	t_details	***map;
@@ -426,7 +451,8 @@ int	main(int argc, char **argv)
 	if (!mlx.mlx_ptr)
 		ft_errno();
 		//here where i got width and length of data map and i have to update it before assign it to the widnow
-	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, mlx.x_map, mlx.y_map, "FDF");
+	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, 500, 500, "FDF");
+	draw_line(mlx, 50, 50, 200, 500, 0xFFFFFF);
 	mlx_loop(mlx.mlx_ptr);
 	mlx_destroy_window(mlx.mlx_ptr, mlx.mlx_window);
 	free(mlx.mlx_ptr);
