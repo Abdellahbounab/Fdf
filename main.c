@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/05 23:55:51 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/05 23:58:21 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -301,7 +301,7 @@ t_details **extract_axis(char *ligne, int min_width, int x)
 			return (free_arr(arr, len), NULL);
 		while (y < len)
 		{
-			cpy[y] = get_data(arr[y], x * 10, y * 10, len);
+			cpy[y] = get_data(arr[y], x, y, len);
 			if (!cpy[y])
 				return (free_arr(arr, len), free_axis(&cpy, len), NULL);
 			y++;
@@ -505,15 +505,15 @@ int	main(int argc, char **argv)
 	int j= 0;
 
 
-	while(map[i])
+	while(i < mlx.x_map)
     {
         j = 0;
         while(j < mlx.y_map)
         {
             
             // isometric(&line);
-            // if(j + 1 < mlx.y_map)
-			printf("\n%d(%.2f,%.2f), 2(%.2f, %.2f)\n", i,  map[i][j]->x, map[i][j]->y, map[i][j + 1]->x, map[i][j + 1]->y);
+            if(j + 1 < mlx.y_map)
+			printf("\n%d(%.2f,%.2f), %d(%.2f, %.2f)\n", i,  map[i][j]->x, map[i][j]->y, j,  map[i][j + 1]->x, map[i][j + 1]->y);
                 draw_line_dda(mlx, *map[i][j], *map[i][j + 1]);
             // isometric(&line2);
             // if(t + 1 < c)
