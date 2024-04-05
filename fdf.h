@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/09 18:43:35 by abounab           #+#    #+#             */
-/*   Updated: 2024/03/13 17:55:03 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/04 20:07:16 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,12 @@
 
 #include <stdio.h>
 #include <mlx.h>
+#include <math.h>
 #include "get_next_line.h"
 
 typedef struct s_details{
-	int	x;
-	int	y;
+	double	x;
+	double	y;
 	int	z;
 	int	color;
 	int opacity;

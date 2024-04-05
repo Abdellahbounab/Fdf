@@ -6,28 +6,28 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/03/13 23:33:23 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/05 23:55:51 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fdf.h"
 
-void read_map(t_details **map)
+void	read_map(t_details **map)
 {
 	int i = 0;
 	int len = 0;
 	
 	if (map[0])
 		len = map[0]->length;
-	while(i < len)
+	while (i < len)
 	{
-		printf("(%d, %d, %d)", map[i]->z, map[i]->x, map[i]->y);
+		printf("(%d, %f, %f)", map[i]->z, map[i]->x, map[i]->y);
 		i++;
 	}
 	printf("\n");
 }
 
-void ft_errno(void)
+void	ft_errno(void)
 {
 	write (2, "Error\n", 6);
 	exit(EXIT_FAILURE);
@@ -151,8 +151,8 @@ t_details *create_data(int x_val, int y_val, int arr_len)
 	axis = (t_details *) malloc (sizeof(t_details));
 	if (axis)
 	{	
-		axis->x = x_val;
-		axis->y = y_val;
+		axis->x = x_val + 50;
+		axis->y = y_val + 50;
 		axis->z = 0; //get value would get the number in hexa or decimal (if error assign to 0, (white color is a default color))
 		axis->color = 0xFFFFFF; //default color (white)
 		axis->opacity = 100;
@@ -301,7 +301,7 @@ t_details **extract_axis(char *ligne, int min_width, int x)
 			return (free_arr(arr, len), NULL);
 		while (y < len)
 		{
-			cpy[y] = get_data(arr[y], x, y, len);
+			cpy[y] = get_data(arr[y], x * 10, y * 10, len);
 			if (!cpy[y])
 				return (free_arr(arr, len), free_axis(&cpy, len), NULL);
 			y++;
@@ -391,27 +391,68 @@ int	valid_file(char *name, char *fdf, int len)
 	return (0);
 }
 
-int draw_line(t_mlx_data data, int x1, int y1, int x2, int y2, int color)
+// void    draw_line_bresenham(t_mlx_data mlx, t_details p1, t_details p2)
+// {
+// 	//find the slope |m| = (Delta_y)|y2 - y1| / (Delta_x)|x2 - x1|
+// 	// for DDA : if (|m| <= 1) then {if (left->right) x += 1 and y += m / if (right -> left) x -= 1 and y -= m}
+// 	        // : if (|m| > 1 && m > 0) then {if (left -> right) y += 1 and x += 1/m / if (right -> left) y -= 1 and x -= 1/m}
+// 			// : if (|m| > 1 && m < 0) then {if (left -> right) y -= 1 and x -= 1/m / if (right -> left) y += 1 and x += 1/m}
+//     int    m;
+// 	int sign;
+//     t_details	delta;
+// 	t_details	position;
+
+// 	int plus = 40;
+
+// 	// isometric(&p1, &p2);
+
+//     position.x = p1.x * 40;
+//     position.y = p1.y * 40;
+// 	delta.x = fabs(p2.x - p1.x);
+// 	delta.y = fabs(p2.y - p1.y);
+// 	m = delta.y / delta.x;
+
+// 	sign = 1;
+// 	if (p2.x > p1.x)
+// 		sign = -1;
+	
+//     while(position.x <= p2.x)
+//     {
+//         if(abs(m) <= 1)
+// 		{
+// 			position.x += (1 * sign);
+// 			position.y += (m * sign);
+// 		}
+//         else if (m > 0)
+// 		{
+// 			position.y += (1 * sign);
+// 			position.x += (sign * 1 / m);
+// 		}
+// 		else
+// 		{
+// 			position.y -= (1 * sign);
+// 			position.x -= (sign * 1 / m);
+// 		}
+// 		printf("position of x = %f/ position of y = %f\n", position.x, position.y);
+//             mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, position.x, position.y, p1.color);
+//     }
+// }
+
+int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 {
-	int diff_x;
-	int diff_y;
-	int x_i;
-	int y_i;
+	t_details printable;
 	int steps;
 
-	diff_x = abs(x2 - x1);
-	diff_y = abs(y2 - y1);
-	if (abs(diff_x) > abs(diff_y))
-		steps = abs(diff_x);
-	else
-		steps = abs(diff_y);
-	x_i = diff_x / steps;
-	y_i = diff_y / steps;
+	printable.x = fabs(p2.x - p1.x);
+ 	printable.y = fabs(p2.y - p1.y);
+	steps = sqrt((printable.x * printable.x) +  (printable.y * printable.y));
+	printable.x /= steps;
+ 	printable.y /= steps;
 	while (steps--)
 	{
-		mlx_pixel_put(data.mlx_ptr, data.mlx_window, x1, y2, color);
-		x1 += x_i;
-		y1 += y_i;
+		mlx_pixel_put(data.mlx_ptr, data.mlx_window, p1.x, p1.y, p1.color);
+		p1.x += printable.x;
+		p1.y += printable.y;
 	}
 	return (1);
 }
@@ -439,7 +480,6 @@ int	main(int argc, char **argv)
 			map = valid_axis(argv[1], &mlx.x_map, &mlx.y_map);
 			if (map) // check if map is only digits && colors hexa or decimial && insert the data required depends on its x, y, z
 			{
-				 
 				printf("done\n");
 			}
 		}
@@ -452,7 +492,42 @@ int	main(int argc, char **argv)
 		ft_errno();
 		//here where i got width and length of data map and i have to update it before assign it to the widnow
 	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, 500, 500, "FDF");
-	draw_line(mlx, 50, 50, 200, 500, 0xFFFFFF);
+	// square
+	// draw_line(mlx, 50, 50, 200, 50, 0xFF00FF);
+	// draw_line(mlx, 50, 200, 200, 200, 0x00FFFF);
+	// draw_line(mlx, 50, 50, 50, 200, 0xFFFF00);
+	// draw_line(mlx, 200, 50, 200, 200, 0xF0FF0F);
+	// triangle
+
+
+	
+	int i = 0;
+	int j= 0;
+
+
+	while(map[i])
+    {
+        j = 0;
+        while(j < mlx.y_map)
+        {
+            
+            // isometric(&line);
+            // if(j + 1 < mlx.y_map)
+			printf("\n%d(%.2f,%.2f), 2(%.2f, %.2f)\n", i,  map[i][j]->x, map[i][j]->y, map[i][j + 1]->x, map[i][j + 1]->y);
+                draw_line_dda(mlx, *map[i][j], *map[i][j + 1]);
+            // isometric(&line2);
+            // if(t + 1 < c)
+            //     draw_line(mlx.mlx_ptr, mlx.mlx_window, line.start, line.end, line.transform_z);
+			j++;
+        }
+        i++;
+    }
+
+
+	
+	// draw_line(mlx, 250, 0, 500, 500, 0x00FF00);
+	
+	
 	mlx_loop(mlx.mlx_ptr);
 	mlx_destroy_window(mlx.mlx_ptr, mlx.mlx_window);
 	free(mlx.mlx_ptr);
