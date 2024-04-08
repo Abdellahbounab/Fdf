@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/05 23:58:21 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/08 20:34:29 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void	read_map(t_details **map)
 		len = map[0]->length;
 	while (i < len)
 	{
-		printf("(%d, %f, %f)", map[i]->z, map[i]->x, map[i]->y);
+		printf("(%d, %.2f, %.2f)", map[i]->z, map[i]->x, map[i]->y);
 		i++;
 	}
 	printf("\n");
@@ -144,15 +144,15 @@ int	  get_value(char *str) //have to implements the hexa part
 	return (num);
 }
 
-t_details *create_data(int x_val, int y_val, int arr_len)
+t_details *create_data(int y_val, int x_val, int arr_len)
 {
 	t_details *axis;
 
 	axis = (t_details *) malloc (sizeof(t_details));
 	if (axis)
-	{	
-		axis->x = x_val + 50;
-		axis->y = y_val + 50;
+	{
+		axis->y = y_val * 10;
+		axis->x = x_val * 10;
 		axis->z = 0; //get value would get the number in hexa or decimal (if error assign to 0, (white color is a default color))
 		axis->color = 0xFFFFFF; //default color (white)
 		axis->opacity = 100;
@@ -161,7 +161,7 @@ t_details *create_data(int x_val, int y_val, int arr_len)
 	return (axis);
 }
 
-t_details *get_data(char *str, int x_val, int y_val, int arr_len)
+t_details *get_data(char *str, int y_val, int x_val, int arr_len)
 {
 	t_details *axis;
 	char **arr;
@@ -171,7 +171,7 @@ t_details *get_data(char *str, int x_val, int y_val, int arr_len)
 	arr = ft_split_space(str, " ,", &len);
 	if (arr && len)
 	{
-		axis = create_data(x_val, y_val, arr_len);
+		axis = create_data(y_val, x_val, arr_len);
 		if (axis)
 		{
 			axis->z = get_value(arr[0]);
@@ -284,14 +284,14 @@ void free_axis(t_details ***map, int len)
 	free(cpy);
 }
 
-t_details **extract_axis(char *ligne, int min_width, int x)
+t_details **extract_axis(char *ligne, int min_width, int y)
 {
 	char **arr;
-	int	y;
+	int	x;
 	int len;
 	t_details **cpy;
 
-	y = 0;
+	x = 0;
 	len = 0;
 	arr = ft_split_space(ligne, " \t\n",&len);
 	if (len >= min_width)
@@ -299,13 +299,14 @@ t_details **extract_axis(char *ligne, int min_width, int x)
 		cpy = (t_details **) malloc (sizeof(t_details *) * len);
 		if (!cpy)
 			return (free_arr(arr, len), NULL);
-		while (y < len)
+		while (x < len)
 		{
-			cpy[y] = get_data(arr[y], x, y, len);
-			if (!cpy[y])
+			cpy[x] = get_data(arr[x], y, x, len);
+			if (!cpy[x])
 				return (free_arr(arr, len), free_axis(&cpy, len), NULL);
-			y++;
+			x++;
 		}
+		// read_map(cpy);
 		return (free_arr(arr, len), cpy);
 	}
 	return (free_arr(arr, len), NULL);
@@ -363,18 +364,16 @@ t_details	***valid_axis(char *file, int *x_map, int *y_map)
 	min_width = words_count(ligne, " \t");
 	while (ligne && *ligne)
 	{
-		*(cpy + i) = extract_axis(ligne, min_width, i);
+		cpy[i] = extract_axis(ligne, min_width, i);
 		if (!(*(cpy + i)))
 			return (free(ligne), clear_map(cpy, i - 1), ft_errno(), NULL);
-		read_map(cpy[i]);
 		free(ligne);
-		ligne = NULL;
 		ligne = get_next_line(fd);
-		i++;	
+		i++;
 	}
 	if (!min_width)
 		return (free(ligne), ft_errno(), NULL);
-	return (*x_map = min_width, *y_map = i, cpy);
+	return (*y_map = i, *x_map = min_width, cpy);
 }
 
 int	valid_file(char *name, char *fdf, int len)
@@ -443,9 +442,13 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 	t_details printable;
 	int steps;
 
-	printable.x = fabs(p2.x - p1.x);
+	p1.x += 20;
+	p1.y += 20;
+	p2.x += 20;
+	p2.y += 20;
  	printable.y = fabs(p2.y - p1.y);
-	steps = sqrt((printable.x * printable.x) +  (printable.y * printable.y));
+	printable.x = fabs(p2.x - p1.x);
+	steps = sqrt((printable.y * printable.y) + (printable.x * printable.x));
 	printable.x /= steps;
  	printable.y /= steps;
 	while (steps--)
@@ -455,6 +458,17 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 		p1.y += printable.y;
 	}
 	return (1);
+}
+
+t_details  *isometric(t_details point)
+{
+	t_details *cpy;
+
+	cpy = create_data((point.x + point.y) * sin(0.523599) - point.z, (point.x - point.y) * cos(0.523599), point.length);
+	cpy->color = point.color;
+	if (!cpy)
+		return (NULL);
+	return (cpy);
 }
 
 int	main(int argc, char **argv)
@@ -480,7 +494,7 @@ int	main(int argc, char **argv)
 			map = valid_axis(argv[1], &mlx.x_map, &mlx.y_map);
 			if (map) // check if map is only digits && colors hexa or decimial && insert the data required depends on its x, y, z
 			{
-				printf("done\n");
+				printf("map achieved :\n");
 			}
 		}
 		else
@@ -491,7 +505,7 @@ int	main(int argc, char **argv)
 	if (!mlx.mlx_ptr)
 		ft_errno();
 		//here where i got width and length of data map and i have to update it before assign it to the widnow
-	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, 500, 500, "FDF");
+	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, 1500, 1000, "FDF");
 	// square
 	// draw_line(mlx, 50, 50, 200, 50, 0xFF00FF);
 	// draw_line(mlx, 50, 200, 200, 200, 0x00FFFF);
@@ -501,33 +515,52 @@ int	main(int argc, char **argv)
 
 
 	
-	int i = 0;
-	int j= 0;
 
 
-	while(i < mlx.x_map)
+	t_details *tmp;
+	t_details *tmp_y;
+	t_details *tmp_x;
+	// while (i + 1 < mlx.y_map)
+	// 	read_map(map[i++]);
+
+	int i;
+	int j;
+
+	i = 0;
+	while(i < mlx.y_map)
     {
         j = 0;
-        while(j < mlx.y_map)
+        while(j < mlx.x_map)
         {
-            
-            // isometric(&line);
-            if(j + 1 < mlx.y_map)
-			printf("\n%d(%.2f,%.2f), %d(%.2f, %.2f)\n", i,  map[i][j]->x, map[i][j]->y, j,  map[i][j + 1]->x, map[i][j + 1]->y);
-                draw_line_dda(mlx, *map[i][j], *map[i][j + 1]);
-            // isometric(&line2);
-            // if(t + 1 < c)
-            //     draw_line(mlx.mlx_ptr, mlx.mlx_window, line.start, line.end, line.transform_z);
+			tmp = isometric(*map[i][j]);
+            // tmp = map[i][j];
+            if(i + 1 < mlx.y_map)
+			{
+            	// tmp_y = isometric(map[i + 1][j]);
+            	tmp_y = map[i + 1][j];
+                draw_line_dda(mlx, *tmp, *tmp_y);
+                // draw_line_dda(mlx, *map[i][j], *map[i + 1][j]);
+			}
+            if(j + 1 < mlx.x_map)
+			{
+            	// tmp_x = isometric(map[i][j + 1]);
+            	tmp_x = map[i][j + 1];
+                draw_line_dda(mlx, *tmp, *tmp_x);
+			}
+			free(tmp);
+			tmp = NULL;
+			// free(tmp_x);
+			// tmp_x = NULL;
+			// free(tmp_y);
+			// tmp_y = NULL;
 			j++;
         }
+		printf("\n");
         i++;
     }
 
-
-	
 	// draw_line(mlx, 250, 0, 500, 500, 0x00FF00);
-	
-	
+
 	mlx_loop(mlx.mlx_ptr);
 	mlx_destroy_window(mlx.mlx_ptr, mlx.mlx_window);
 	free(mlx.mlx_ptr);
