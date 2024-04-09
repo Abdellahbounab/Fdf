@@ -390,62 +390,110 @@ int	valid_file(char *name, char *fdf, int len)
 	return (0);
 }
 
-// void    draw_line_bresenham(t_mlx_data mlx, t_details p1, t_details p2)
+// void    draw_line_bresenham(t_mlx_data mlx, double p1_x, double p1_y, double p2_x, double p2_y, int color)
 // {
 // 	//find the slope |m| = (Delta_y)|y2 - y1| / (Delta_x)|x2 - x1|
 // 	// for DDA : if (|m| <= 1) then {if (left->right) x += 1 and y += m / if (right -> left) x -= 1 and y -= m}
 // 	        // : if (|m| > 1 && m > 0) then {if (left -> right) y += 1 and x += 1/m / if (right -> left) y -= 1 and x -= 1/m}
 // 			// : if (|m| > 1 && m < 0) then {if (left -> right) y -= 1 and x -= 1/m / if (right -> left) y += 1 and x += 1/m}
-//     int    m;
-// 	int sign;
+//     double    p;
 //     t_details	delta;
 // 	t_details	position;
 
-// 	int plus = 40;
+// 	int plus = 100;
 
-// 	// isometric(&p1, &p2);
+// 	int tmp;
 
-//     position.x = p1.x * 40;
-//     position.y = p1.y * 40;
-// 	delta.x = fabs(p2.x - p1.x);
-// 	delta.y = fabs(p2.y - p1.y);
-// 	m = delta.y / delta.x;
+// 	p1_x += plus;
+// 	p1_y += plus;
+// 	p2_x += plus;
+// 	p2_y += plus;
 
-// 	sign = 1;
-// 	if (p2.x > p1.x)
-// 		sign = -1;
+// 	if (p2_x < p1_x)
+// 	{
+// 		printf("here");
+// 		tmp = p1_x;
+// 		p1_x = p2_x;
+// 		p2_x = tmp;
+// 		tmp = p1_y;
+// 		p1_y = p2_y;
+// 		p2_y = tmp;
+// 	}
+//     position.x = p1_x;
+//     position.y = p1_y;
+// 	delta.x = fabs(p2_x - p1_x);
+// 	delta.y = fabs(p2_y - p1_y);
+// 	p = 2 * delta.y - delta.x;
+
+// 	// printf("p = %.2f\n", p);
 	
-//     while(position.x <= p2.x)
+//     while (position.x <= p2_x)
 //     {
-//         if(abs(m) <= 1)
+//         if (p < 0)
 // 		{
-// 			position.x += (1 * sign);
-// 			position.y += (m * sign);
-// 		}
-//         else if (m > 0)
-// 		{
-// 			position.y += (1 * sign);
-// 			position.x += (sign * 1 / m);
+// 			position.x += 1;
+// 			p += 2 * delta.y;
 // 		}
 // 		else
 // 		{
-// 			position.y -= (1 * sign);
-// 			position.x -= (sign * 1 / m);
+// 			position.y += 1;
+// 			position.x += 1;
+// 			p += 2 * delta.y - 2 * delta.x;
 // 		}
-// 		printf("position of x = %f/ position of y = %f\n", position.x, position.y);
-//             mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, position.x, position.y, p1.color);
+// 		mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, position.x, position.y, color);
 //     }
 // }
+
+
+void    draw_line_bresenham(t_mlx_data mlx, double x0, double y0, double x1, double y1, int color)
+{
+	float	dxy[4];
+	int		fraction;
+	t_details	dup;
+
+	int plus = 100;
+
+	x0 += plus;
+	y0 += plus;
+	x1 += plus;
+	y1 += plus;
+
+	dxy[0] = fabs(x1 - x0);
+	dxy[1] = fabs(y1 - y0);
+	dxy[2] = x0 < x1 ? 1 : -1;
+	dxy[3] = y0 < y1 ? 1 : -1;
+	fraction = dxy[0] - dxy[1];
+	dup.x = x0;
+	dup.y = y0;
+	dup.color = color;
+	// the while need to stop at the point where it is achieved , and that would be in all case
+	while (dup.x != x1 && dup.y != x1)
+	{
+		// process_color(&dup, from, to, dxy);
+		mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, dup.x, dup.y, dup.color);
+		if (fraction * 2 > -dxy[1])
+		{
+			fraction -= dxy[1];
+			dup.x += dxy[2];
+		}
+		else if (fraction * 2 < dxy[0])
+		{
+			fraction += dxy[0];
+			dup.y += dxy[3];
+		}
+	}
+
+}
 
 int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 {
 	t_details printable;
 	int steps;
 
-	p1.x += 20;
-	p1.y += 20;
-	p2.x += 20;
-	p2.y += 20;
+	p1.x += 100;
+	p1.y += 100;
+	p2.x += 100;
+	p2.y += 100;
  	printable.y = fabs(p2.y - p1.y);
 	printable.x = fabs(p2.x - p1.x);
 	steps = sqrt((printable.y * printable.y) + (printable.x * printable.x));
@@ -460,15 +508,36 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 	return (1);
 }
 
-t_details  *isometric(t_details point)
-{
-	t_details *cpy;
+// t_details  *isometric(t_details point)
+// {
+// 	t_details *cpy;
 
-	cpy = create_data((point.x + point.y) * sin(0.523599) - point.z, (point.x - point.y) * cos(0.523599), point.length);
-	cpy->color = point.color;
-	if (!cpy)
-		return (NULL);
-	return (cpy);
+// 	cpy = create_data((point.x + point.y) * sin(0.523599) - point.z, (point.x - point.y) * cos(0.523599), point.length);
+// 	cpy->color = point.color;
+// 	if (!cpy)
+// 		return (NULL);
+// 	return (cpy);
+// }
+
+void	isometric(t_details ***map, int width, int length, double raduis)
+{
+	int i;
+	int j;
+	double tmp;
+
+	i = 0;
+	while (i < length)
+	{
+		j = 0;
+		while (j < width)
+		{
+			tmp = map[i][j]->x;
+			map[i][j]->x = (tmp - map[i][j]->y) * cos(raduis);
+			map[i][j]->y = (tmp + map[i][j]->y) * sin(raduis) - map[i][j]->z;
+			j++;
+		}
+		i++;
+	}
 }
 
 int	main(int argc, char **argv)
@@ -505,7 +574,7 @@ int	main(int argc, char **argv)
 	if (!mlx.mlx_ptr)
 		ft_errno();
 		//here where i got width and length of data map and i have to update it before assign it to the widnow
-	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, 1500, 1000, "FDF");
+	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, 500, 500, "FDF");
 	// square
 	// draw_line(mlx, 50, 50, 200, 50, 0xFF00FF);
 	// draw_line(mlx, 50, 200, 200, 200, 0x00FFFF);
@@ -517,45 +586,24 @@ int	main(int argc, char **argv)
 	
 
 
-	t_details *tmp;
-	t_details *tmp_y;
-	t_details *tmp_x;
-	// while (i + 1 < mlx.y_map)
-	// 	read_map(map[i++]);
-
 	int i;
 	int j;
 
 	i = 0;
+	isometric(map, mlx.x_map, mlx.y_map, 30 * (3.14159265358979 / 180));
 	while(i < mlx.y_map)
     {
         j = 0;
+		read_map(map[i]);
         while(j < mlx.x_map)
         {
-			tmp = isometric(*map[i][j]);
-            // tmp = map[i][j];
-            if(i + 1 < mlx.y_map)
-			{
-            	// tmp_y = isometric(map[i + 1][j]);
-            	tmp_y = map[i + 1][j];
-                draw_line_dda(mlx, *tmp, *tmp_y);
-                // draw_line_dda(mlx, *map[i][j], *map[i + 1][j]);
-			}
             if(j + 1 < mlx.x_map)
-			{
-            	// tmp_x = isometric(map[i][j + 1]);
-            	tmp_x = map[i][j + 1];
-                draw_line_dda(mlx, *tmp, *tmp_x);
-			}
-			free(tmp);
-			tmp = NULL;
-			// free(tmp_x);
-			// tmp_x = NULL;
-			// free(tmp_y);
-			// tmp_y = NULL;
+                draw_line_bresenham(mlx, map[i][j]->x, map[i][j]->y, map[i][j + 1]->x, map[i][j + 1]->y, map[i][j]->color);
+            if(i + 1 < mlx.y_map)
+                draw_line_bresenham(mlx, map[i][j]->x, map[i][j]->y, map[i + 1][j]->x, map[i + 1][j]->y, map[i][j]->color);
 			j++;
         }
-		printf("\n");
+		// printf("\n");
         i++;
     }
 

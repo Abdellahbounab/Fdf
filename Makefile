@@ -18,7 +18,7 @@ else
 endif
 
 ifeq ($(shell uname), Linux)
-	MLX_FLAGS = -Lmlx -lmlx -L/usr/lib/X11 -lXext -lX11
+	MLX_FLAGS = -Lmlx -lmlx -L/usr/lib/X11 -lXext -lX11 -lm
 else
 	MLX_FLAGS =  -lmlx -framework OpenGL -framework AppKit
 endif
