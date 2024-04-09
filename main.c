@@ -6,11 +6,13 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/09 21:16:55 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/09 23:12:13 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fdf.h"
+
+// https://github.com/ailopez-o/42Barcelona-FdF
 
 void	read_map(t_details **map)
 {
@@ -527,7 +529,7 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 	t_details printable;
 	int steps;
 	int plus = data.x_map * 20 / 2;
-	int	coloring;
+	double	coloring;
 	
 
 	p1.x += plus;
@@ -542,12 +544,14 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 	printable.y /= steps;
 	printable.y *= p1.y < p2.y ? 1 : -1;
 	
+	// color is more of red100%0%----50%+50%----0%100%black and not this
 	coloring =  abs(p1.color - p2.color) / steps;
+	coloring *= p1.color < p2.color ? 1 : -1;
 
 	while (steps-- >= 0)
 	{
 		mlx_pixel_put(data.mlx_ptr, data.mlx_window, p1.x, p1.y, p1.color);
-		p1.color += coloring;
+		p1.color += (int)coloring;
 		if (p1.x != p2.x)
 			p1.x += printable.x;
 		if (p1.y != p2.y)
@@ -578,7 +582,12 @@ void	isometric(t_details ***map, int width, int length, double raduis)
 	}
 }
 
-int draw_map(t_mlx_data mlx, t_details ***map)
+double ft_raduis(double angle)
+{
+	return (angle * (3.14159265358979 / 180));
+}
+
+int draw_map(t_mlx_data mlx, t_details ***map, char *title)
 {
 	int i;
 	int j;
@@ -587,8 +596,8 @@ int draw_map(t_mlx_data mlx, t_details ***map)
 	mlx.mlx_ptr = mlx_init();
 	if (!mlx.mlx_ptr)
 		ft_errno();
-	isometric(map, mlx.x_map, mlx.y_map, 30 * (3.14159265358979 / 180)); 
-	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, map[0][mlx.x_map - 1]->x * 2.5, map[mlx.y_map - 1][mlx.x_map - 1]->y + 100, "FDF");
+	isometric(map, mlx.x_map, mlx.y_map, ft_raduis(45)); 
+	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, map[0][mlx.x_map - 1]->x * 2.5, map[mlx.y_map - 1][mlx.x_map - 1]->y + 100, title);
 	while(i < mlx.y_map)
     {
         j = 0;
@@ -634,7 +643,7 @@ int	main(int argc, char **argv)
 			if (map) // check if map is only digits && colors hexa or decimial && insert the data required depends on its x, y, z
 			{
 				printf("map achieved :\n");
-				draw_map(mlx, map);
+				draw_map(mlx, map, argv[1]);
 			}
 		}
 		else
