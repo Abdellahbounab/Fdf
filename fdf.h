@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/09 18:43:35 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/04 20:07:16 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/12 18:00:19 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ int	ft_atoi(char *str);
 
 int	get_value(char *str);
 
-t_details *get_data(char *str, int x_val, int y_val, int len);
+t_details *get_data(char *str, int x_val, int y_val, int len, int y_max);
 
 int	words_count(char *str, char *charset);
 
@@ -61,7 +61,7 @@ char	*ft_strdups(char **str, int len);
 
 char	**ft_split_space(char *str, char *charset, int *len);
 
-t_details **extract_axis(char *ligne, int min_width, int x);
+t_details **extract_axis(char *ligne, int min_width, int x, int y_max);
 
 t_details	***valid_axis(char *file, int *x_map, int *y_map);
 

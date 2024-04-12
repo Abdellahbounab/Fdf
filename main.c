@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/09 23:12:13 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/12 22:53:15 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,15 +146,19 @@ int	  get_value(char *str) //have to implements the hexa part
 	return (num);
 }
 
-t_details *create_data(int y_val, int x_val, int arr_len)
+t_details *create_data(int y_val, int x_val, int arr_len, int max_y)
 {
 	t_details *axis;
+	int plus;
 
 	axis = (t_details *) malloc (sizeof(t_details));
+	plus = 5;
+	if (max_y <= 50)
+		plus = 10;
 	if (axis)
 	{
-		axis->y = y_val * 10;
-		axis->x = x_val * 10;
+		axis->y = y_val * plus;
+		axis->x = x_val * plus;
 		axis->z = 0; //get value would get the number in hexa or decimal (if error assign to 0, (white color is a default color))
 		axis->color = 0xFFFFFF; //default color (white)
 		axis->opacity = 100;
@@ -163,7 +167,7 @@ t_details *create_data(int y_val, int x_val, int arr_len)
 	return (axis);
 }
 
-t_details *get_data(char *str, int y_val, int x_val, int arr_len)
+t_details *get_data(char *str, int y_val, int x_val, int arr_len, int max_y)
 {
 	t_details *axis;
 	char **arr;
@@ -173,7 +177,7 @@ t_details *get_data(char *str, int y_val, int x_val, int arr_len)
 	arr = ft_split_space(str, " ,", &len);
 	if (arr && len)
 	{
-		axis = create_data(y_val, x_val, arr_len);
+		axis = create_data(y_val, x_val, arr_len, max_y);
 		if (axis)
 		{
 			axis->z = get_value(arr[0]);
@@ -286,7 +290,7 @@ void free_axis(t_details ***map, int len)
 	free(cpy);
 }
 
-t_details **extract_axis(char *ligne, int min_width, int y)
+t_details **extract_axis(char *ligne, int min_width, int y, int max_y)
 {
 	char **arr;
 	int	x;
@@ -303,7 +307,7 @@ t_details **extract_axis(char *ligne, int min_width, int y)
 			return (printf("here1\n"), free_arr(arr, len), NULL);
 		while (x < len)
 		{
-			cpy[x] = get_data(arr[x], y, x, len);
+			cpy[x] = get_data(arr[x], y, x, len, max_y);
 			if (!cpy[x])
 				return (printf("here2\n"), free_arr(arr, len), free_axis(&cpy, len), NULL);
 			x++;
@@ -326,7 +330,7 @@ void clear_map(t_details ***map, int len)
 	}
 }
 
-int count_lignes(char *file)
+int count_lignes(char *file, int *y_map)
 {
 	int fd ;
 	int len;
@@ -346,7 +350,7 @@ int count_lignes(char *file)
 		}
 	}
 	close(fd);
-	return (len);
+	return (*y_map = len, len);
 }
 
 t_details	***valid_axis(char *file, int *x_map, int *y_map)
@@ -358,7 +362,7 @@ t_details	***valid_axis(char *file, int *x_map, int *y_map)
 	t_details ***cpy;
 
 	i = 0;
-	cpy = (t_details ***) malloc (sizeof(t_details **) * count_lignes(file));
+	cpy = (t_details ***) malloc (sizeof(t_details **) * count_lignes(file, y_map));
 	if (!cpy)
 		return (NULL);
 	fd = open(file, O_RDONLY);
@@ -366,7 +370,7 @@ t_details	***valid_axis(char *file, int *x_map, int *y_map)
 	min_width = words_count(ligne, " \t\n");
 	while (ligne && *ligne)
 	{
-		cpy[i] = extract_axis(ligne, min_width, i);
+		cpy[i] = extract_axis(ligne, min_width, i, *y_map);
 		if (!cpy[i])
 			return (free(ligne), clear_map(cpy, i - 1), ft_errno(), NULL);
 		free(ligne);
@@ -527,14 +531,17 @@ void    berseham_draw(t_mlx_data mlx, double x0, double y0, double x1, double y1
 int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 {
 	t_details printable;
-	int steps;
-	int plus = data.x_map * 20 / 2;
+	double steps;
+	int plus = data.y_map * 20 / 2;
 	double	coloring;
 	
 
-	p1.x += plus;
+	if (data.x_map < 200)
+	{
+		p1.x += plus;
+		p2.x += plus;
+	}
 	// p1.y += plus / 2;
-	p2.x += plus;
 	// p2.y += plus / 2;
  	printable.y = fabs(p2.y - p1.y);
 	printable.x = fabs(p2.x - p1.x);
@@ -547,7 +554,6 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 	// color is more of red100%0%----50%+50%----0%100%black and not this
 	coloring =  abs(p1.color - p2.color) / steps;
 	coloring *= p1.color < p2.color ? 1 : -1;
-
 	while (steps-- >= 0)
 	{
 		mlx_pixel_put(data.mlx_ptr, data.mlx_window, p1.x, p1.y, p1.color);
@@ -587,31 +593,48 @@ double ft_raduis(double angle)
 	return (angle * (3.14159265358979 / 180));
 }
 
+int	return_y(int num_rows)
+{
+	if (num_rows + 100 < 1000)
+		return (num_rows + 100);
+	else
+		return (1000);
+}
+
+int return_x(int num_col)
+{
+	if (num_col * 2.5 < 1000)
+		return (num_col * 2.5);
+	else
+		return (1000);
+}
+
 int draw_map(t_mlx_data mlx, t_details ***map, char *title)
 {
 	int i;
 	int j;
 	
-	i = 0;
+	i = mlx.y_map - 1;
 	mlx.mlx_ptr = mlx_init();
 	if (!mlx.mlx_ptr)
 		ft_errno();
-	isometric(map, mlx.x_map, mlx.y_map, ft_raduis(45)); 
-	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, map[0][mlx.x_map - 1]->x * 2.5, map[mlx.y_map - 1][mlx.x_map - 1]->y + 100, title);
-	while(i < mlx.y_map)
+	isometric(map, mlx.x_map, mlx.y_map, ft_raduis(30)); 
+	// mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, map[0][mlx.x_map - 1]->x * 2.5, map[mlx.y_map - 1][mlx.x_map - 1]->y + 100, title);
+	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, return_x(map[0][mlx.x_map - 1]->x), return_y(map[mlx.y_map - 1][mlx.x_map - 1]->y), title);
+	while(i >= 0)
     {
         j = 0;
         while(j < mlx.x_map)
         {
+			// to draw a perfect map , it needs to adjust the window on the map size + grading color + adjust map if it is bigger + positioning the map in the middle
             if(j + 1 < mlx.x_map)
                 draw_line_dda(mlx, *map[i][j], *map[i][j + 1]);
             if(i + 1 < mlx.y_map)
 				draw_line_dda(mlx, *map[i][j], *map[i + 1][j]);
 			j++;
         }
-        i++;
+		i--;
     }
-	
 	mlx_loop(mlx.mlx_ptr);
 	mlx_destroy_window(mlx.mlx_ptr, mlx.mlx_window);
 	free(mlx.mlx_ptr);
@@ -644,14 +667,15 @@ int	main(int argc, char **argv)
 			{
 				printf("map achieved :\n");
 				draw_map(mlx, map, argv[1]);
+				clear_map(map, mlx.y_map);
 			}
 		}
 		else
 			printf("error : file error\n");
 	}
 
-	
-	
+
+
 	//adding valgrind to my linux ! to rememeber
 
 
@@ -664,13 +688,4 @@ int	main(int argc, char **argv)
 			//colors can take hexa or decimal
 			//if planning for bonus must add opacity
 
-
-
-	// mlx = mlx_init();
-	// mlx_win = mlx_new_window(mlx, 500, 500, "Abounab");
-	// draw_line(mlx, mlx_win, 500, 500, 0, 0, 0xFFFFFF);
-	// draw_line(mlx, mlx_win, 500, 0, 0, 500, 0xFFFFFF);
-	// mlx_mouse_hook(mlx_win, &mouse_event, 0);
-	// mlx_loop(mlx);
-	// mlx_destroy_display(mlx);
 }
