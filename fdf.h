@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/09 18:43:35 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/12 18:00:19 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/13 21:30:06 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,20 @@ typedef struct s_mlx_data{
 	void *mlx_window;
 	int	x_map;
 	int	y_map;
+	double scale_x;
+	double scale_y;
+	int x_min;
+
+	void	*img;
+	char	*addr;
+	int		bits_per_pixel;
+	int		endian;
 } t_mlx_data;
 
 int	valid_file(char *name, char *fdf, int len);
 
 void	free_arr(char **arr, int len);
-void free_axis(t_details ***map, int len);
+void 	free_axis(t_details ***map, int len);
 void clear_map(t_details ***map, int len);
 
 

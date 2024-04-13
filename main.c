@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/12 22:53:15 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/13 21:53:12 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,9 +152,9 @@ t_details *create_data(int y_val, int x_val, int arr_len, int max_y)
 	int plus;
 
 	axis = (t_details *) malloc (sizeof(t_details));
-	plus = 5;
-	if (max_y <= 50)
-		plus = 10;
+	plus = 100 / max_y;
+	if (max_y > 100)
+		plus = max_y / 10;
 	if (axis)
 	{
 		axis->y = y_val * plus;
@@ -304,18 +304,18 @@ t_details **extract_axis(char *ligne, int min_width, int y, int max_y)
 	{
 		cpy = (t_details **) malloc (sizeof(t_details *) * len);
 		if (!cpy)
-			return (printf("here1\n"), free_arr(arr, len), NULL);
+			return (free_arr(arr, len), NULL);
 		while (x < len)
 		{
 			cpy[x] = get_data(arr[x], y, x, len, max_y);
 			if (!cpy[x])
-				return (printf("here2\n"), free_arr(arr, len), free_axis(&cpy, len), NULL);
+				return (free_arr(arr, len), free_axis(&cpy, len), NULL);
 			x++;
 		}
 		// read_map(cpy);
 		return (free_arr(arr, len), cpy);
 	}
-	return (printf("here4\n"), free_arr(arr, len), NULL);
+	return (free_arr(arr, len), NULL);
 }
 
 void clear_map(t_details ***map, int len)
@@ -528,21 +528,30 @@ void    berseham_draw(t_mlx_data mlx, double x0, double y0, double x1, double y1
 }
 
 
-int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
+void	my_mlx_pixel_put(t_mlx_data *data, int x, int y, int color)
 {
-	t_details printable;
-	double steps;
-	int plus = data.y_map * 20 / 2;
-	double	coloring;
+	char	*dst;
+
+	printf("addr:%s\n", data->addr);
+	dst = data->addr + (y * data->x_map + x * (data->bits_per_pixel / 8));
+	*(unsigned int*)dst = color;
+}
+
+int draw_line_dda(t_mlx_data data, t_details p1, t_details p2, t_mlx_data map_dimension)
+{
+	t_details	printable;
+	double 		steps;
+	double		coloring;
 	
 
-	if (data.x_map < 200)
-	{
-		p1.x += plus;
-		p2.x += plus;
-	}
-	// p1.y += plus / 2;
-	// p2.y += plus / 2;
+	p1.x *= map_dimension.scale_x;
+	p1.x += (map_dimension.x_min * map_dimension.scale_x) + 10;
+	p1.y *= map_dimension.scale_y;
+	
+	p2.x *= map_dimension.scale_x;
+	p2.x += (map_dimension.x_min * map_dimension.scale_x) + 10;
+	p2.y *= map_dimension.scale_y;
+	
  	printable.y = fabs(p2.y - p1.y);
 	printable.x = fabs(p2.x - p1.x);
 	steps = sqrt(pow(printable.y, 2) + pow(printable.x, 2));
@@ -557,6 +566,7 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 	while (steps-- >= 0)
 	{
 		mlx_pixel_put(data.mlx_ptr, data.mlx_window, p1.x, p1.y, p1.color);
+		// my_mlx_pixel_put(&data, p1.x, p1.y, p1.color);
 		p1.color += (int)coloring;
 		if (p1.x != p2.x)
 			p1.x += printable.x;
@@ -593,48 +603,112 @@ double ft_raduis(double angle)
 	return (angle * (3.14159265358979 / 180));
 }
 
-int	return_y(int num_rows)
+int	return_y(t_details ***map, int x_width, int y_width)
 {
-	if (num_rows + 100 < 1000)
-		return (num_rows + 100);
-	else
-		return (1000);
+	int	i;
+	int	j;
+	int min;
+	int max;
+
+	i = 0;
+	min = map[i][i]->y;
+	max = map[i][i]->y;
+	while (i < y_width)
+	{
+		j = 0;
+		while (j < x_width)
+		{
+			if (min > map[i][j]->y)
+				min = map[i][j]->y;
+			if (max < map[i][j]->y)
+				max = map[i][j]->y;
+			j++;
+		}
+		i++;
+	}
+	return (abs(max - min));
 }
 
-int return_x(int num_col)
+int return_x(t_details ***map, int x_width, int y_width, int *x_min)
 {
-	if (num_col * 2.5 < 1000)
-		return (num_col * 2.5);
-	else
-		return (1000);
+	int	i;
+	int	j;
+	int min;
+	int max;
+
+	i = 0;
+	min = map[i][i]->x;
+	max = map[i][i]->x;
+	while (i < y_width)
+	{
+		j = 0;
+		while (j < x_width)
+		{
+			if (min > map[i][j]->x)
+				min = map[i][j]->x;
+			if (max < map[i][j]->x)
+				max = map[i][j]->x;
+			j++;
+		}
+		i++;
+	}
+	*x_min = abs(min);
+	printf("min x : %d max = %d\n", min, max);
+	return (abs(max - min));
 }
+
+t_mlx_data calculate_dimension(t_details ***map, int x_width, int y_height)
+{
+	t_mlx_data res;
+
+	res.x_map = return_x(map, x_width, y_height, &res.x_min);
+	res.y_map = return_y(map, x_width, y_height);
+	
+	res.scale_x = (double)1000 / res.x_map ;
+	res.scale_y = (double)1000 / res.y_map ;
+
+	res.y_map *= res.scale_y;
+	res.x_map *= res.scale_x;
+
+	if (res.scale_x < 1)
+		res.x_map = 1000;
+		
+	if (res.scale_y < 1)
+		res.y_map = 1000;
+	return (res);
+}
+
 
 int draw_map(t_mlx_data mlx, t_details ***map, char *title)
 {
 	int i;
 	int j;
+	t_mlx_data map_dimension;
 	
-	i = mlx.y_map - 1;
+	i = 0;
 	mlx.mlx_ptr = mlx_init();
 	if (!mlx.mlx_ptr)
 		ft_errno();
-	isometric(map, mlx.x_map, mlx.y_map, ft_raduis(30)); 
-	// mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, map[0][mlx.x_map - 1]->x * 2.5, map[mlx.y_map - 1][mlx.x_map - 1]->y + 100, title);
-	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, return_x(map[0][mlx.x_map - 1]->x), return_y(map[mlx.y_map - 1][mlx.x_map - 1]->y), title);
-	while(i >= 0)
+	isometric(map, mlx.x_map, mlx.y_map, ft_raduis(45)); 
+	map_dimension = calculate_dimension(map, mlx.x_map, mlx.y_map);
+	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, map_dimension.x_map, map_dimension.y_map, title);
+	// mlx.img = mlx_new_image(mlx.mlx_ptr, map_dimension.x_map, map_dimension.y_map);
+	// mlx.addr = mlx_get_data_addr(mlx.img, &mlx.bits_per_pixel, &mlx.x_map,&mlx.endian);
+	while(i < mlx.y_map)
     {
         j = 0;
         while(j < mlx.x_map)
         {
-			// to draw a perfect map , it needs to adjust the window on the map size + grading color + adjust map if it is bigger + positioning the map in the middle
+			// to draw a perfect map , it needs to  grading color
             if(j + 1 < mlx.x_map)
-                draw_line_dda(mlx, *map[i][j], *map[i][j + 1]);
+                draw_line_dda(mlx, *map[i][j], *map[i][j + 1], map_dimension);
             if(i + 1 < mlx.y_map)
-				draw_line_dda(mlx, *map[i][j], *map[i + 1][j]);
+				draw_line_dda(mlx, *map[i][j], *map[i + 1][j], map_dimension);
 			j++;
         }
-		i--;
+		i++;
     }
+	// mlx_put_image_to_window(mlx.mlx_ptr, mlx.mlx_window, mlx.img, 0, 0);
 	mlx_loop(mlx.mlx_ptr);
 	mlx_destroy_window(mlx.mlx_ptr, mlx.mlx_window);
 	free(mlx.mlx_ptr);
