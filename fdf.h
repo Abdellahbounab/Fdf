@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/09 18:43:35 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/13 21:30:06 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/14 18:09:23 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,7 @@ typedef struct s_mlx_data{
 	double scale_x;
 	double scale_y;
 	int x_min;
+	int y_min;
 
 	void	*img;
 	char	*addr;

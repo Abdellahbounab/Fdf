@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/13 21:53:12 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/14 22:55:23 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -312,7 +312,6 @@ t_details **extract_axis(char *ligne, int min_width, int y, int max_y)
 				return (free_arr(arr, len), free_axis(&cpy, len), NULL);
 			x++;
 		}
-		// read_map(cpy);
 		return (free_arr(arr, len), cpy);
 	}
 	return (free_arr(arr, len), NULL);
@@ -396,136 +395,136 @@ int	valid_file(char *name, char *fdf, int len)
 	return (0);
 }
 
-void	bershnam_draw2(t_mlx_data mlx, double x0, double y0, double x1, double y1, int color)
-{
-	double dx = fabs(y1 - y0);
-	double dy = -fabs(x1 - x0);
-	int sx = x0 < x1 ? 1 : -1;
-	int sy = y0 < y1 ? 1 : -1;
-	double err = dx + dy;
-	double er2;
+// void	bershnam_draw2(t_mlx_data mlx, double x0, double y0, double x1, double y1, int color)
+// {
+// 	double dx = fabs(y1 - y0);
+// 	double dy = -fabs(x1 - x0);
+// 	int sx = x0 < x1 ? 1 : -1;
+// 	int sy = y0 < y1 ? 1 : -1;
+// 	double err = dx + dy;
+// 	double er2;
 	
-	while ((int)(x0 - x1) && (int)(y0 - y1))
-	{
-		mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
-		er2 = 2 * err;
-		if (er2 >= dy)
-		{
-			err += dy;
-			x0 += sx;
-		}
-		if (er2 <= dx)
-		{
-			err += dx;
-			y0 += sy;
-		}
-	}
-}
+// 	while ((int)(x0 - x1) && (int)(y0 - y1))
+// 	{
+// 		mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
+// 		er2 = 2 * err;
+// 		if (er2 >= dy)
+// 		{
+// 			err += dy;
+// 			x0 += sx;
+// 		}
+// 		if (er2 <= dx)
+// 		{
+// 			err += dx;
+// 			y0 += sy;
+// 		}
+// 	}
+// }
 
-void    draw_line_bresenham(t_mlx_data mlx, double x0, double y0, double x1, double y1, int color)
-{
-	float	dxy[4];
-	int		fraction;
-	t_details	dup;
+// void    draw_line_bresenham(t_mlx_data mlx, double x0, double y0, double x1, double y1, int color)
+// {
+// 	float	dxy[4];
+// 	int		fraction;
+// 	t_details	dup;
 
-	int plus = 100;
+// 	int plus = 100;
 
-	x0 += plus;
-	y0 += plus;
-	x1 += plus;
-	y1 += plus;
+// 	x0 += plus;
+// 	y0 += plus;
+// 	x1 += plus;
+// 	y1 += plus;
 
-	dxy[0] = fabs(x1 - x0);
-	dxy[1] = fabs(y1 - y0);
-	dxy[2] = x0 < x1 ? 1 : -1;
-	dxy[3] = y0 < y1 ? 1 : -1;
-	fraction = dxy[0] - dxy[1];
-	dup.x = x0;
-	dup.y = y0;
-	dup.color = color;
-	// the while need to stop at the point where it is achieved , and that would be in all case
-	// while (steps-- && dup.x != x1)
-	while (dup.x != x1 && dup.y != y1)
-	{
-		// process_color(&dup, from, to, dxy);
-		mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, dup.x, dup.y, dup.color);
-		if (fraction * 2 > -dxy[1])
-		{
-			fraction -= dxy[1];
-			dup.x += dxy[2];
-		}
-		else if (fraction * 2 < dxy[0])
-		{
-			fraction += dxy[0];
-			dup.y += dxy[3];
-		}
-	}
+// 	dxy[0] = fabs(x1 - x0);
+// 	dxy[1] = fabs(y1 - y0);
+// 	dxy[2] = x0 < x1 ? 1 : -1;
+// 	dxy[3] = y0 < y1 ? 1 : -1;
+// 	fraction = dxy[0] - dxy[1];
+// 	dup.x = x0;
+// 	dup.y = y0;
+// 	dup.color = color;
+// 	// the while need to stop at the point where it is achieved , and that would be in all case
+// 	// while (steps-- && dup.x != x1)
+// 	while (dup.x != x1 && dup.y != y1)
+// 	{
+// 		// process_color(&dup, from, to, dxy);
+// 		mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, dup.x, dup.y, dup.color);
+// 		if (fraction * 2 > -dxy[1])
+// 		{
+// 			fraction -= dxy[1];
+// 			dup.x += dxy[2];
+// 		}
+// 		else if (fraction * 2 < dxy[0])
+// 		{
+// 			fraction += dxy[0];
+// 			dup.y += dxy[3];
+// 		}
+// 	}
 
-}
-void	slope_bigger_than_one(t_mlx_data mlx, double dx, double dy, double x0, double y0, int color)
-{
-	int p;
-	int i;
+// }
+// void	slope_bigger_than_one(t_mlx_data mlx, double dx, double dy, double x0, double y0, int color)
+// {
+// 	int p;
+// 	int i;
 
-	i = 0;
-	p = 2 * dx - dy;
-	mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
-	while (i < dy)
-	{
-		y0 += 1;
-		if (p < 0)
-			p += 2 * dx;
-		else
-		{
-			x0 += 1;
-			p += 2 * dx - dy;
-		}
-		mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
-		i++;
-	}
-}
+// 	i = 0;
+// 	p = 2 * dx - dy;
+// 	mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
+// 	while (i < dy)
+// 	{
+// 		y0 += 1;
+// 		if (p < 0)
+// 			p += 2 * dx;
+// 		else
+// 		{
+// 			x0 += 1;
+// 			p += 2 * dx - dy;
+// 		}
+// 		mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
+// 		i++;
+// 	}
+// }
 
 
 
-void	slope_less_than_one(t_mlx_data mlx, double dx, double dy, double x0, double y0, int color)
-{
-	int p;
-	int i;
+// void	slope_less_than_one(t_mlx_data mlx, double dx, double dy, double x0, double y0, int color)
+// {
+// 	int p;
+// 	int i;
 
-	i = 0;
-	p = 2 * dy - dx;
-	mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
-	while (i < dx)
-	{
-		x0 += 1;
-		if (p < 0)
-			p += 2 * dy;
-		else
-		{
-			y0 += 1;
-			p += 2 * dy - 2 * dx;
-		}
-		mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
-		i++;
-	}
-}
+// 	i = 0;
+// 	p = 2 * dy - dx;
+// 	mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
+// 	while (i < dx)
+// 	{
+// 		x0 += 1;
+// 		if (p < 0)
+// 			p += 2 * dy;
+// 		else
+// 		{
+// 			y0 += 1;
+// 			p += 2 * dy - 2 * dx;
+// 		}
+// 		mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
+// 		i++;
+// 	}
+// }
 
-void    berseham_draw(t_mlx_data mlx, double x0, double y0, double x1, double y1, int color)
-{
-	float	dxy[4];
-	int plus = 100;
+// void    berseham_draw(t_mlx_data mlx, double x0, double y0, double x1, double y1, int color)
+// {
+// 	float	dxy[4];
+// 	int plus = 100;
 
-	x0 += plus;
-	y0 += plus;
-	x1 += plus;
-	y1 += plus;
- 	dxy[0] = fabs(x1 - x0);
-	dxy[1] = fabs(y1 - y0);
-	if ((double)(dxy[1] / dxy[0]) < 1)
-		slope_less_than_one(mlx, dxy[0], dxy[1], x0, y0, color);
-	else
-		slope_bigger_than_one(mlx, dxy[0], dxy[1], x0, y0, color);
-}
+// 	x0 += plus;
+// 	y0 += plus;
+// 	x1 += plus;
+// 	y1 += plus;
+//  	dxy[0] = fabs(x1 - x0);
+// 	dxy[1] = fabs(y1 - y0);
+// 	if ((double)(dxy[1] / dxy[0]) < 1)
+// 		slope_less_than_one(mlx, dxy[0], dxy[1], x0, y0, color);
+// 	else
+// 		slope_bigger_than_one(mlx, dxy[0], dxy[1], x0, y0, color);
+// }
 
 
 void	my_mlx_pixel_put(t_mlx_data *data, int x, int y, int color)
@@ -547,10 +546,12 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2, t_mlx_data map_di
 	p1.x *= map_dimension.scale_x;
 	p1.x += (map_dimension.x_min * map_dimension.scale_x) + 10;
 	p1.y *= map_dimension.scale_y;
+	p1.y += (map_dimension.y_min * map_dimension.scale_y);
 	
 	p2.x *= map_dimension.scale_x;
 	p2.x += (map_dimension.x_min * map_dimension.scale_x) + 10;
 	p2.y *= map_dimension.scale_y;
+	p2.y += (map_dimension.y_min * map_dimension.scale_y);
 	
  	printable.y = fabs(p2.y - p1.y);
 	printable.x = fabs(p2.x - p1.x);
@@ -576,6 +577,76 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2, t_mlx_data map_di
 	return (1);
 }
 
+void rotate_by_z(t_details **map, double raduis)
+{
+	int cpy_x;	
+	int cpy_y;	
+	int cpy_z;
+	
+	cpy_x = (*map)->x;
+	cpy_y = (*map)->y;
+	cpy_z = (*map)->z;
+		
+	(*map)->x = cos(raduis) * cpy_x + -sin(raduis) * cpy_y + 0 * cpy_z;
+	(*map)->y = sin(raduis) * cpy_x + cos(raduis) * cpy_y + 0 * cpy_z;
+	(*map)->z = 0 * cpy_z + 0 * cpy_y + 1 * cpy_z;
+}
+
+void rotate_by_x(t_details **map, double raduis)
+{
+	int cpy_x;	
+	int cpy_y;	
+	int cpy_z;
+	
+	cpy_x = (*map)->x;
+	cpy_y = (*map)->y;
+	cpy_z = (*map)->z;
+		
+	(*map)->x = 1 * cpy_x + 0 * cpy_y + 0 * cpy_z;
+	(*map)->y = 0 * cpy_x + cos(raduis) * cpy_y + -sin(raduis) * cpy_z;
+	(*map)->z = 0 * cpy_z + sin(raduis) * cpy_y + cos(raduis) * cpy_z;
+}
+
+void rotate_by_y(t_details **map, double raduis)
+{
+	int cpy_x;	
+	int cpy_y;	
+	int cpy_z;
+	
+	cpy_x = (*map)->x;
+	cpy_y = (*map)->y;
+	cpy_z = (*map)->z;
+		
+	(*map)->x = cos(raduis) * cpy_x + 0 * cpy_y + sin(raduis) * cpy_z;
+	(*map)->y = 0 * cpy_x + 1 * cpy_y + 0 * cpy_z;
+	(*map)->z = -sin(raduis) * cpy_z + 0 * cpy_y + cos(raduis) * cpy_z;
+}
+
+
+double ft_raduis(double angle)
+{
+	return (angle * (3.14159265358979 / 180));
+}
+
+void	rotation_matrices(t_details ***map, int width, int length, double raduis)
+{
+	int i;
+	int j;
+
+	i = 0;
+	while (i < length)
+	{
+		j = 0;
+		while (j < width)
+		{
+			rotate_by_z(&map[i][j], raduis);
+			rotate_by_x(&map[i][j], raduis);
+			// rotate_by_y(&map[i][j], 0);
+			j++;
+		}
+		i++;
+	}
+}
 
 void	isometric(t_details ***map, int width, int length, double raduis)
 {
@@ -598,12 +669,8 @@ void	isometric(t_details ***map, int width, int length, double raduis)
 	}
 }
 
-double ft_raduis(double angle)
-{
-	return (angle * (3.14159265358979 / 180));
-}
 
-int	return_y(t_details ***map, int x_width, int y_width)
+int	return_y(t_details ***map, int x_width, int y_width, int *y_min)
 {
 	int	i;
 	int	j;
@@ -626,6 +693,7 @@ int	return_y(t_details ***map, int x_width, int y_width)
 		}
 		i++;
 	}
+	*y_min = abs(min);
 	return (abs(max - min));
 }
 
@@ -653,7 +721,6 @@ int return_x(t_details ***map, int x_width, int y_width, int *x_min)
 		i++;
 	}
 	*x_min = abs(min);
-	printf("min x : %d max = %d\n", min, max);
 	return (abs(max - min));
 }
 
@@ -662,19 +729,24 @@ t_mlx_data calculate_dimension(t_details ***map, int x_width, int y_height)
 	t_mlx_data res;
 
 	res.x_map = return_x(map, x_width, y_height, &res.x_min);
-	res.y_map = return_y(map, x_width, y_height);
+	res.y_map = return_y(map, x_width, y_height, &res.y_min);
 	
 	res.scale_x = (double)1000 / res.x_map ;
-	res.scale_y = (double)1000 / res.y_map ;
+	res.scale_y = (double)500 / res.y_map ;
 
-	res.y_map *= res.scale_y;
 	res.x_map *= res.scale_x;
+	res.y_map *= res.scale_y * 2;
 
-	if (res.scale_x < 1)
-		res.x_map = 1000;
+	if (res.scale_x > 1 || res.scale_y > 1)
+	{
+		if (res.scale_x > 1)
+			res.x_map /= 2;
 		
-	if (res.scale_y < 1)
-		res.y_map = 1000;
+		if (res.scale_y > 1)
+			res.y_map /= 2;
+		res.scale_x /= 2;
+		res.scale_y /= 2;
+	}
 	return (res);
 }
 
@@ -689,7 +761,8 @@ int draw_map(t_mlx_data mlx, t_details ***map, char *title)
 	mlx.mlx_ptr = mlx_init();
 	if (!mlx.mlx_ptr)
 		ft_errno();
-	isometric(map, mlx.x_map, mlx.y_map, ft_raduis(45)); 
+	// isometric(map, mlx.x_map, mlx.y_map, ft_raduis(45));
+	rotation_matrices(map, mlx.x_map, mlx.y_map, ft_raduis(45));
 	map_dimension = calculate_dimension(map, mlx.x_map, mlx.y_map);
 	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, map_dimension.x_map, map_dimension.y_map, title);
 	// mlx.img = mlx_new_image(mlx.mlx_ptr, map_dimension.x_map, map_dimension.y_map);
@@ -728,16 +801,15 @@ int	main(int argc, char **argv)
 			// 2 - check map : get all lines length as the first one	VALIDE
 			// 3 - get details from the map (matrices of [x(width)][y(length)]) and getting the axis z	VALDIE
 			// 3 - handle the hexa or decimal colors in each point	VALIDE
-			// 4 - draw the points inside the mlx while connecting every point with its (x - 1) (x + 1) (y + 1) (y - 1)
+			// 4 - draw the points inside the mlx while connecting every point with its (x - 1) (x + 1) (y + 1) (y - 1) VALID
 			// 5 - rending colors with every points
 	
 	if (argc == 2)
 	{
-		if (valid_file(argv[1], ".fdf", ft_strlen(argv[1]))) // check file if end with .fdf , if exist, if permissions
+		if (valid_file(argv[1], ".fdf", ft_strlen(argv[1])))
 		{
-	// 		// check if map have the same width length as the first line or higher : if less == error
 			map = valid_axis(argv[1], &mlx.x_map, &mlx.y_map);
-			if (map) // check if map is only digits && colors hexa or decimial && insert the data required depends on its x, y, z
+			if (map)
 			{
 				printf("map achieved :\n");
 				draw_map(mlx, map, argv[1]);
