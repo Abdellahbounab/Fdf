@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/14 22:55:23 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/14 22:56:52 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -732,10 +732,10 @@ t_mlx_data calculate_dimension(t_details ***map, int x_width, int y_height)
 	res.y_map = return_y(map, x_width, y_height, &res.y_min);
 	
 	res.scale_x = (double)1000 / res.x_map ;
-	res.scale_y = (double)500 / res.y_map ;
+	res.scale_y = (double)1000 / res.y_map ;
 
 	res.x_map *= res.scale_x;
-	res.y_map *= res.scale_y * 2;
+	res.y_map *= res.scale_y;
 
 	if (res.scale_x > 1 || res.scale_y > 1)
 	{
