@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/14 22:56:52 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/15 19:57:11 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,9 +159,8 @@ t_details *create_data(int y_val, int x_val, int arr_len, int max_y)
 	{
 		axis->y = y_val * plus;
 		axis->x = x_val * plus;
-		axis->z = plus; //get value would get the number in hexa or decimal (if error assign to 0, (white color is a default color))
-		axis->color = 0xFFFFFF; //default color (white)
-		axis->opacity = 100;
+		axis->z = plus;
+		axis->color = 0xFFFFFF;
 		axis->length = arr_len;
 	}
 	return (axis);
@@ -183,13 +182,11 @@ t_details *get_data(char *str, int y_val, int x_val, int arr_len, int max_y)
 			axis->z *= get_value(arr[0]);
 			if (len > 1)
 				axis->color = get_value(arr[1]);
-			if (len > 2)
-				axis->opacity = get_value(arr[2]);
-			return (axis);
+			return (free_arr(arr, len), axis);
 		}
-		return (NULL);
+		return (free_arr(arr, len), NULL);
 	}
-	return (NULL);
+	return (free_arr(arr, len), NULL);
 }
 
 int	words_count(char *str, char *charset)
@@ -395,156 +392,20 @@ int	valid_file(char *name, char *fdf, int len)
 	return (0);
 }
 
-// void	bershnam_draw2(t_mlx_data mlx, double x0, double y0, double x1, double y1, int color)
-// {
-// 	double dx = fabs(y1 - y0);
-// 	double dy = -fabs(x1 - x0);
-// 	int sx = x0 < x1 ? 1 : -1;
-// 	int sy = y0 < y1 ? 1 : -1;
-// 	double err = dx + dy;
-// 	double er2;
+int	put_color(int color1, int color2, int steps, int px)
+{
+	double	colors[3];
 	
-// 	while ((int)(x0 - x1) && (int)(y0 - y1))
-// 	{
-// 		mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
-// 		er2 = 2 * err;
-// 		if (er2 >= dy)
-// 		{
-// 			err += dy;
-// 			x0 += sx;
-// 		}
-// 		if (er2 <= dx)
-// 		{
-// 			err += dx;
-// 			y0 += sy;
-// 		}
-// 	}
-// }
+	colors[0] = ((((color2 >> 16) & 0xFF) - ((color1 >> 16) & 0xFF))) /  (double) steps;
+	colors[1] = ((((color2 >> 8) & 0xFF) - ((color1 >> 8) & 0xFF)) / (double) steps);
+	colors[2] = ((((color2) & 0xFF) - ((color1) & 0xFF)) / (double) steps);
 
-// void    draw_line_bresenham(t_mlx_data mlx, double x0, double y0, double x1, double y1, int color)
-// {
-// 	float	dxy[4];
-// 	int		fraction;
-// 	t_details	dup;
+	colors[0] = ((color1 >> 16) & 0xFF) + (int)round(px * (colors[0]));
+	colors[1] = ((color1 >> 8) & 0xFF) + (int)round(px * colors[1]);
+	colors[2] = ((color1) & 0xFF) + (int)round(px * colors[2]);
+	
 
-// 	int plus = 100;
-
-// 	x0 += plus;
-// 	y0 += plus;
-// 	x1 += plus;
-// 	y1 += plus;
-
-// 	dxy[0] = fabs(x1 - x0);
-// 	dxy[1] = fabs(y1 - y0);
-// 	dxy[2] = x0 < x1 ? 1 : -1;
-// 	dxy[3] = y0 < y1 ? 1 : -1;
-// 	fraction = dxy[0] - dxy[1];
-// 	dup.x = x0;
-// 	dup.y = y0;
-// 	dup.color = color;
-// 	// the while need to stop at the point where it is achieved , and that would be in all case
-// 	// while (steps-- && dup.x != x1)
-// 	while (dup.x != x1 && dup.y != y1)
-// 	{
-// 		// process_color(&dup, from, to, dxy);
-// 		mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, dup.x, dup.y, dup.color);
-// 		if (fraction * 2 > -dxy[1])
-// 		{
-// 			fraction -= dxy[1];
-// 			dup.x += dxy[2];
-// 		}
-// 		else if (fraction * 2 < dxy[0])
-// 		{
-// 			fraction += dxy[0];
-// 			dup.y += dxy[3];
-// 		}
-// 	}
-
-// }
-// void	slope_bigger_than_one(t_mlx_data mlx, double dx, double dy, double x0, double y0, int color)
-// {
-// 	int p;
-// 	int i;
-
-// 	i = 0;
-// 	p = 2 * dx - dy;
-// 	mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
-// 	while (i < dy)
-// 	{
-// 		y0 += 1;
-// 		if (p < 0)
-// 			p += 2 * dx;
-// 		else
-// 		{
-// 			x0 += 1;
-// 			p += 2 * dx - dy;
-// 		}
-// 		mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
-// 		i++;
-// 	}
-// }
-
-
-
-// void	slope_less_than_one(t_mlx_data mlx, double dx, double dy, double x0, double y0, int color)
-// {
-// 	int p;
-// 	int i;
-
-// 	i = 0;
-// 	p = 2 * dy - dx;
-// 	mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
-// 	while (i < dx)
-// 	{
-// 		x0 += 1;
-// 		if (p < 0)
-// 			p += 2 * dy;
-// 		else
-// 		{
-// 			y0 += 1;
-// 			p += 2 * dy - 2 * dx;
-// 		}
-// 		mlx_pixel_put(mlx.mlx_ptr, mlx.mlx_window, x0, y0, color);
-// 		i++;
-// 	}
-// }
-
-// void    berseham_draw(t_mlx_data mlx, double x0, double y0, double x1, double y1, int color)
-// {
-// 	float	dxy[4];
-// 	int plus = 100;
-
-// 	x0 += plus;
-// 	y0 += plus;
-// 	x1 += plus;
-// 	y1 += plus;
-//  	dxy[0] = fabs(x1 - x0);
-// 	dxy[1] = fabs(y1 - y0);
-// 	if ((double)(dxy[1] / dxy[0]) < 1)
-// 		slope_less_than_one(mlx, dxy[0], dxy[1], x0, y0, color);
-// 	else
-// 		slope_bigger_than_one(mlx, dxy[0], dxy[1], x0, y0, color);
-// }
-
-int	get_ingridient(int color1, int color2, int steps)
-{
-	if (color1 == color2)
-		return (color1);
-	return ((int)((double)(color1 + (color2 - color1) * steps)));
-}
-
-int	put_color(int color1, int color2, int steps)
-{
-	int red;
-	int	green;
-	int	blue;
-
-	if (color1 == color2)
-		return (color1);
-	red = get_ingridient((color1 >> 16) & 0xFF, (color2 >> 16) & 0xFF, steps);
-	green = get_ingridient((color1 >> 8) & 0xFF, (color2 >> 8) & 0xFF, steps);
-	blue = get_ingridient((color1) & 0xFF, (color2) & 0xFF, steps);
-	return (red << 16 | green << 8 | blue);
+	return ((int)colors[0] << 16 | (int)colors[1] << 8 | (int)colors[2]);
 }
 
 
@@ -552,8 +413,7 @@ void	my_mlx_pixel_put(t_mlx_data *data, int x, int y, int color)
 {
 	char	*dst;
 
-	printf("addr:%s\n", data->addr);
-	dst = data->addr + (y * data->x_map + x * (data->bits_per_pixel / 8));
+	dst = data->image.addr+ (y * data->image.line_length + x * (data->image.bits_per_pixel / 8)); 
 	*(unsigned int*)dst = color;
 }
 
@@ -581,21 +441,20 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2, t_mlx_data map_di
 	printable.y /= steps;
 	printable.y *= p1.y < p2.y ? 1 : -1;
 	
-	// color is more of red100%0%----50%+50%----0%100%black and not this
-	printf(">>>");
-	while (steps-- >= 0)
+	int cpy_steps = steps;
+	int anc_color = p1.color;
+	
+	while (cpy_steps-- >= 0)
 	{
-		mlx_pixel_put(data.mlx_ptr, data.mlx_window, p1.x, p1.y, p1.color);
-		// my_mlx_pixel_put(&data, p1.x, p1.y, p1.color);
-		p1.color = put_color(p1.color, p2.color, steps);
-		if (p1.color != p2.color)
-			printf("+color : (%d, %d)[%.2f]",p1.color,p2.color, steps);
+		my_mlx_pixel_put(&data, p1.x, p1.y, p1.color);
+		
+		p1.color = put_color(anc_color, p2.color, steps, steps - cpy_steps);
+		
 		if (p1.x != p2.x)
 			p1.x += printable.x;
 		if (p1.y != p2.y)
 			p1.y += printable.y;
 	}
-	printf("\n");
 	return (1);
 }
 
@@ -656,36 +515,15 @@ void	rotation_matrices(t_details ***map, int width, int length, double raduis)
 	int j;
 
 	i = 0;
-	raduis++;//this one have to be removeed
+	raduis = 0;//this one have to be removeed
 	while (i < length)
 	{
 		j = 0;
 		while (j < width)
 		{
-			rotate_by_z(&map[i][j], M_PI_4);
+			rotate_by_z(&map[i][j], -(M_PI_4));
 			rotate_by_x(&map[i][j], atan(sqrt(2)));
 			// rotate_by_y(&map[i][j], 0);
-			j++;
-		}
-		i++;
-	}
-}
-
-void	isometric(t_details ***map, int width, int length, double raduis)
-{
-	int i;
-	int j;
-	double tmp;
-
-	i = 0;
-	while (i < length)
-	{
-		j = 0;
-		while (j < width)
-		{
-			tmp = map[i][j]->x;
-			map[i][j]->x = (tmp - map[i][j]->y) * cos(raduis);
-			map[i][j]->y = (tmp + map[i][j]->y) * sin(raduis) - map[i][j]->z;
 			j++;
 		}
 		i++;
@@ -757,29 +595,32 @@ t_mlx_data calculate_dimension(t_details ***map, int x_width, int y_height)
 	res.scale_x = (double)1000 / res.x_map ;
 	res.scale_y = (double)1000 / res.y_map ;
 
-	if (res.scale_y > 1)
-		res.scale_y = (double)500 / res.y_map ;
 	if (res.scale_x > 1)
 		res.scale_x = (double)500 / res.x_map ;
+	if (res.scale_y > 5)
+		res.scale_y = (double)500 / res.y_map ;
+
 	res.x_map *= res.scale_x;
 	res.x_map += 100;
 	res.y_map *= res.scale_y;
-	// res.y_map *= 1;
-	res.scale_y /= 2;
-
-	// if (res.scale_x > 10 || res.scale_y > 10)
-	// {
-	// 	if (res.scale_x > 10)
-	// 		res.x_map /= 2;
-		
-	// 	if (res.scale_y > 10)
-	// 		res.y_map /= 2;
-	// 	res.scale_x /= 2;
-	// 	res.scale_y /= 2;
-	// }
+	res.scale_y /= 1.5;
 	return (res);
 }
 
+int	get_key(int key, t_mlx_data *mlx)
+{
+	if (key == 53)
+	{
+		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
+		mlx_destroy_window(mlx->mlx_ptr, mlx->mlx_window);
+		system("leaks fdf");
+		while(1);
+		// to updte later
+		exit(0);
+	}
+	printf("key pressed : %d\n", key);
+	return (1);
+}
 
 int draw_map(t_mlx_data mlx, t_details ***map, char *title)
 {
@@ -791,18 +632,19 @@ int draw_map(t_mlx_data mlx, t_details ***map, char *title)
 	mlx.mlx_ptr = mlx_init();
 	if (!mlx.mlx_ptr)
 		ft_errno();
-	// isometric(map, mlx.x_map, mlx.y_map, ft_raduis(45));
 	rotation_matrices(map, mlx.x_map, mlx.y_map, ft_raduis(45));
 	map_dimension = calculate_dimension(map, mlx.x_map, mlx.y_map);
 	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, map_dimension.x_map, map_dimension.y_map, title);
-	// mlx.img = mlx_new_image(mlx.mlx_ptr, map_dimension.x_map, map_dimension.y_map);
-	// mlx.addr = mlx_get_data_addr(mlx.img, &mlx.bits_per_pixel, &mlx.x_map,&mlx.endian);
+	
+	mlx.image.img = mlx_new_image(mlx.mlx_ptr, map_dimension.x_map, map_dimension.y_map);
+	
+	mlx.image.addr = mlx_get_data_addr(mlx.image.img, &mlx.image.bits_per_pixel, &mlx.image.line_length, &mlx.image.endian);
+	
 	while(i < mlx.y_map)
     {
         j = 0;
         while(j < mlx.x_map)
         {
-			// to draw a perfect map , it needs to  grading color
             if(j + 1 < mlx.x_map)
                 draw_line_dda(mlx, *map[i][j], *map[i][j + 1], map_dimension);
             if(i + 1 < mlx.y_map)
@@ -811,8 +653,12 @@ int draw_map(t_mlx_data mlx, t_details ***map, char *title)
         }
 		i++;
     }
-	// mlx_put_image_to_window(mlx.mlx_ptr, mlx.mlx_window, mlx.img, 0, 0);
 	clear_map(map, mlx.y_map);
+	mlx_put_image_to_window(mlx.mlx_ptr, mlx.mlx_window, mlx.image.img, 0, 0);
+	
+	mlx.mlx_map = map;
+	
+	mlx_key_hook(mlx.mlx_window, get_key, &mlx);
 	mlx_loop(mlx.mlx_ptr);
 	mlx_destroy_window(mlx.mlx_ptr, mlx.mlx_window);
 	free(mlx.mlx_ptr);
@@ -827,13 +673,6 @@ int	main(int argc, char **argv)
 
 
 	map = NULL;
-	// starting point :
-			// 1 - validate .fdf file from argv[1]   VALIDE
-			// 2 - check map : get all lines length as the first one	VALIDE
-			// 3 - get details from the map (matrices of [x(width)][y(length)]) and getting the axis z	VALDIE
-			// 3 - handle the hexa or decimal colors in each point	VALIDE
-			// 4 - draw the points inside the mlx while connecting every point with its (x - 1) (x + 1) (y + 1) (y - 1) VALID
-			// 5 - rending colors with every points
 	
 	if (argc == 2)
 	{
@@ -841,14 +680,10 @@ int	main(int argc, char **argv)
 		{
 			map = valid_axis(argv[1], &mlx.x_map, &mlx.y_map);
 			if (map)
-			{
-				printf("map achieved :\n");
 				draw_map(mlx, map, argv[1]);
-				clear_map(map, mlx.y_map);
-			}
 		}
 		else
-			printf("error : file error\n");
+			printf("Error : file error\n");//edit the ft_errno to excute the error
 	}
 
 

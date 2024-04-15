@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/09 18:43:35 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/14 18:09:23 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/15 19:38:21 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,16 @@ typedef struct s_details{
 	double	y;
 	int	z;
 	int	color;
-	int opacity;
 	int length;
 }	t_details;
+
+typedef struct s_image{
+	void	*img;
+	char	*addr;
+	int		bits_per_pixel;
+	int		line_length;
+	int		endian;
+} t_image;
 
 typedef struct s_mlx_data{
 	void *mlx_ptr;
@@ -36,11 +43,8 @@ typedef struct s_mlx_data{
 	double scale_y;
 	int x_min;
 	int y_min;
-
-	void	*img;
-	char	*addr;
-	int		bits_per_pixel;
-	int		endian;
+	t_image	image;
+	t_details ***mlx_map;
 } t_mlx_data;
 
 int	valid_file(char *name, char *fdf, int len);
