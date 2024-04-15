@@ -159,7 +159,7 @@ t_details *create_data(int y_val, int x_val, int arr_len, int max_y)
 	{
 		axis->y = y_val * plus;
 		axis->x = x_val * plus;
-		axis->z = 0; //get value would get the number in hexa or decimal (if error assign to 0, (white color is a default color))
+		axis->z = plus; //get value would get the number in hexa or decimal (if error assign to 0, (white color is a default color))
 		axis->color = 0xFFFFFF; //default color (white)
 		axis->opacity = 100;
 		axis->length = arr_len;
@@ -180,7 +180,7 @@ t_details *get_data(char *str, int y_val, int x_val, int arr_len, int max_y)
 		axis = create_data(y_val, x_val, arr_len, max_y);
 		if (axis)
 		{
-			axis->z = get_value(arr[0]);
+			axis->z *= get_value(arr[0]);
 			if (len > 1)
 				axis->color = get_value(arr[1]);
 			if (len > 2)
@@ -526,6 +526,27 @@ int	valid_file(char *name, char *fdf, int len)
 // 		slope_bigger_than_one(mlx, dxy[0], dxy[1], x0, y0, color);
 // }
 
+int	get_ingridient(int color1, int color2, int steps)
+{
+	if (color1 == color2)
+		return (color1);
+	return ((int)((double)(color1 + (color2 - color1) * steps)));
+}
+
+int	put_color(int color1, int color2, int steps)
+{
+	int red;
+	int	green;
+	int	blue;
+
+	if (color1 == color2)
+		return (color1);
+	red = get_ingridient((color1 >> 16) & 0xFF, (color2 >> 16) & 0xFF, steps);
+	green = get_ingridient((color1 >> 8) & 0xFF, (color2 >> 8) & 0xFF, steps);
+	blue = get_ingridient((color1) & 0xFF, (color2) & 0xFF, steps);
+	return (red << 16 | green << 8 | blue);
+}
+
 
 void	my_mlx_pixel_put(t_mlx_data *data, int x, int y, int color)
 {
@@ -540,7 +561,6 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2, t_mlx_data map_di
 {
 	t_details	printable;
 	double 		steps;
-	double		coloring;
 	
 
 	p1.x *= map_dimension.scale_x;
@@ -562,18 +582,20 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2, t_mlx_data map_di
 	printable.y *= p1.y < p2.y ? 1 : -1;
 	
 	// color is more of red100%0%----50%+50%----0%100%black and not this
-	coloring =  abs(p1.color - p2.color) / steps;
-	coloring *= p1.color < p2.color ? 1 : -1;
+	printf(">>>");
 	while (steps-- >= 0)
 	{
 		mlx_pixel_put(data.mlx_ptr, data.mlx_window, p1.x, p1.y, p1.color);
 		// my_mlx_pixel_put(&data, p1.x, p1.y, p1.color);
-		p1.color += (int)coloring;
+		p1.color = put_color(p1.color, p2.color, steps);
+		if (p1.color != p2.color)
+			printf("+color : (%d, %d)[%.2f]",p1.color,p2.color, steps);
 		if (p1.x != p2.x)
 			p1.x += printable.x;
 		if (p1.y != p2.y)
 			p1.y += printable.y;
 	}
+	printf("\n");
 	return (1);
 }
 
