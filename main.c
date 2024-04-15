@@ -101,7 +101,7 @@ int	ft_atox(char *str)
 			break;
 		i++;
 	}
-	if (i < 8 || (i == 8 && str[i]))
+	if (( i < 8 || i == 8) && str[i])
 		num = 0;
 	while (str && str[i] && (str[i] == ' ' || str[i] == '\t'))
 		i++;
@@ -544,14 +544,14 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2, t_mlx_data map_di
 	
 
 	p1.x *= map_dimension.scale_x;
-	p1.x += (map_dimension.x_min * map_dimension.scale_x) + 10;
+	p1.x += (map_dimension.x_min * map_dimension.scale_x) + 50;
 	p1.y *= map_dimension.scale_y;
-	p1.y += (map_dimension.y_min * map_dimension.scale_y);
+	p1.y += (map_dimension.y_min * map_dimension.scale_y) + 100;
 	
 	p2.x *= map_dimension.scale_x;
-	p2.x += (map_dimension.x_min * map_dimension.scale_x) + 10;
+	p2.x += (map_dimension.x_min * map_dimension.scale_x) + 50;
 	p2.y *= map_dimension.scale_y;
-	p2.y += (map_dimension.y_min * map_dimension.scale_y);
+	p2.y += (map_dimension.y_min * map_dimension.scale_y) + 100;
 	
  	printable.y = fabs(p2.y - p1.y);
 	printable.x = fabs(p2.x - p1.x);
@@ -634,13 +634,14 @@ void	rotation_matrices(t_details ***map, int width, int length, double raduis)
 	int j;
 
 	i = 0;
+	raduis++;//this one have to be removeed
 	while (i < length)
 	{
 		j = 0;
 		while (j < width)
 		{
-			rotate_by_z(&map[i][j], raduis);
-			rotate_by_x(&map[i][j], raduis);
+			rotate_by_z(&map[i][j], M_PI_4);
+			rotate_by_x(&map[i][j], atan(sqrt(2)));
 			// rotate_by_y(&map[i][j], 0);
 			j++;
 		}
@@ -734,19 +735,26 @@ t_mlx_data calculate_dimension(t_details ***map, int x_width, int y_height)
 	res.scale_x = (double)1000 / res.x_map ;
 	res.scale_y = (double)1000 / res.y_map ;
 
+	if (res.scale_y > 1)
+		res.scale_y = (double)500 / res.y_map ;
+	if (res.scale_x > 1)
+		res.scale_x = (double)500 / res.x_map ;
 	res.x_map *= res.scale_x;
+	res.x_map += 100;
 	res.y_map *= res.scale_y;
+	// res.y_map *= 1;
+	res.scale_y /= 2;
 
-	if (res.scale_x > 1 || res.scale_y > 1)
-	{
-		if (res.scale_x > 1)
-			res.x_map /= 2;
+	// if (res.scale_x > 10 || res.scale_y > 10)
+	// {
+	// 	if (res.scale_x > 10)
+	// 		res.x_map /= 2;
 		
-		if (res.scale_y > 1)
-			res.y_map /= 2;
-		res.scale_x /= 2;
-		res.scale_y /= 2;
-	}
+	// 	if (res.scale_y > 10)
+	// 		res.y_map /= 2;
+	// 	res.scale_x /= 2;
+	// 	res.scale_y /= 2;
+	// }
 	return (res);
 }
 
@@ -782,6 +790,7 @@ int draw_map(t_mlx_data mlx, t_details ***map, char *title)
 		i++;
     }
 	// mlx_put_image_to_window(mlx.mlx_ptr, mlx.mlx_window, mlx.img, 0, 0);
+	clear_map(map, mlx.y_map);
 	mlx_loop(mlx.mlx_ptr);
 	mlx_destroy_window(mlx.mlx_ptr, mlx.mlx_window);
 	free(mlx.mlx_ptr);
