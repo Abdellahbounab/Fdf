@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/15 19:57:11 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/15 22:25:12 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -413,25 +413,25 @@ void	my_mlx_pixel_put(t_mlx_data *data, int x, int y, int color)
 {
 	char	*dst;
 
-	dst = data->image.addr+ (y * data->image.line_length + x * (data->image.bits_per_pixel / 8)); 
+	dst = data->image.addr + (y * data->image.line_length + x * (data->image.bits_per_pixel / 8)); 
 	*(unsigned int*)dst = color;
 }
 
-int draw_line_dda(t_mlx_data data, t_details p1, t_details p2, t_mlx_data map_dimension)
+int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 {
 	t_details	printable;
 	double 		steps;
 	
 
-	p1.x *= map_dimension.scale_x;
-	p1.x += (map_dimension.x_min * map_dimension.scale_x) + 50;
-	p1.y *= map_dimension.scale_y;
-	p1.y += (map_dimension.y_min * map_dimension.scale_y) + 100;
+	p1.x *= data.scale_x;
+	p1.x += (data.x_min * data.scale_x) + 50;
+	p1.y *= data.scale_y;
+	p1.y += (data.y_min * data.scale_y) + 100;
 	
-	p2.x *= map_dimension.scale_x;
-	p2.x += (map_dimension.x_min * map_dimension.scale_x) + 50;
-	p2.y *= map_dimension.scale_y;
-	p2.y += (map_dimension.y_min * map_dimension.scale_y) + 100;
+	p2.x *= data.scale_x;
+	p2.x += (data.x_min * data.scale_x) + 50;
+	p2.y *= data.scale_y;
+	p2.y += (data.y_min * data.scale_y) + 100;
 	
  	printable.y = fabs(p2.y - p1.y);
 	printable.x = fabs(p2.x - p1.x);
@@ -446,10 +446,9 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2, t_mlx_data map_di
 	
 	while (cpy_steps-- >= 0)
 	{
-		my_mlx_pixel_put(&data, p1.x, p1.y, p1.color);
-		
+		if (p1.x < data.width_dimension && p1.y < data.height_dimension)
+			my_mlx_pixel_put(&data, p1.x, p1.y, p1.color);
 		p1.color = put_color(anc_color, p2.color, steps, steps - cpy_steps);
-		
 		if (p1.x != p2.x)
 			p1.x += printable.x;
 		if (p1.y != p2.y)
@@ -509,25 +508,27 @@ double ft_raduis(double angle)
 	return (angle * (3.14159265358979 / 180));
 }
 
-void	rotation_matrices(t_details ***map, int width, int length, double raduis)
+int	rotation_matrices(t_mlx_data *mlx, double raduis[])
 {
 	int i;
 	int j;
 
 	i = 0;
-	raduis = 0;//this one have to be removeed
-	while (i < length)
+	while (i < mlx->y_map)
 	{
 		j = 0;
-		while (j < width)
+		while (j < mlx->x_map)
 		{
-			rotate_by_z(&map[i][j], -(M_PI_4));
-			rotate_by_x(&map[i][j], atan(sqrt(2)));
+			// rotate_by_z(&mlx->mlx_map[i][j], -(M_PI_4));
+			rotate_by_z(&mlx->mlx_map[i][j], raduis[0]);
+			// rotate_by_x(&mlx->mlx_map[i][j], atan(sqrt(2)));
+			rotate_by_x(&mlx->mlx_map[i][j], raduis[1]);
 			// rotate_by_y(&map[i][j], 0);
 			j++;
 		}
 		i++;
 	}
+	return (1);
 }
 
 
@@ -585,27 +586,6 @@ int return_x(t_details ***map, int x_width, int y_width, int *x_min)
 	return (abs(max - min));
 }
 
-t_mlx_data calculate_dimension(t_details ***map, int x_width, int y_height)
-{
-	t_mlx_data res;
-
-	res.x_map = return_x(map, x_width, y_height, &res.x_min);
-	res.y_map = return_y(map, x_width, y_height, &res.y_min);
-	
-	res.scale_x = (double)1000 / res.x_map ;
-	res.scale_y = (double)1000 / res.y_map ;
-
-	if (res.scale_x > 1)
-		res.scale_x = (double)500 / res.x_map ;
-	if (res.scale_y > 5)
-		res.scale_y = (double)500 / res.y_map ;
-
-	res.x_map *= res.scale_x;
-	res.x_map += 100;
-	res.y_map *= res.scale_y;
-	res.scale_y /= 1.5;
-	return (res);
-}
 
 int	get_key(int key, t_mlx_data *mlx)
 {
@@ -613,51 +593,82 @@ int	get_key(int key, t_mlx_data *mlx)
 	{
 		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		mlx_destroy_window(mlx->mlx_ptr, mlx->mlx_window);
-		system("leaks fdf");
-		while(1);
-		// to updte later
 		exit(0);
 	}
+	// if (key == 126)
+	// {
+		// draw_map();
+	// }
 	printf("key pressed : %d\n", key);
 	return (1);
 }
 
-int draw_map(t_mlx_data mlx, t_details ***map, char *title)
+int	create_image(t_mlx_data *mlx)
 {
 	int i;
 	int j;
-	t_mlx_data map_dimension;
 	
 	i = 0;
-	mlx.mlx_ptr = mlx_init();
-	if (!mlx.mlx_ptr)
-		ft_errno();
-	rotation_matrices(map, mlx.x_map, mlx.y_map, ft_raduis(45));
-	map_dimension = calculate_dimension(map, mlx.x_map, mlx.y_map);
-	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, map_dimension.x_map, map_dimension.y_map, title);
-	
-	mlx.image.img = mlx_new_image(mlx.mlx_ptr, map_dimension.x_map, map_dimension.y_map);
-	
-	mlx.image.addr = mlx_get_data_addr(mlx.image.img, &mlx.image.bits_per_pixel, &mlx.image.line_length, &mlx.image.endian);
-	
-	while(i < mlx.y_map)
+	mlx->image.img = mlx_new_image(mlx->mlx_ptr, mlx->width_dimension, mlx->height_dimension);
+	mlx->image.addr = mlx_get_data_addr(mlx->image.img, &mlx->image.bits_per_pixel, &mlx->image.line_length, &mlx->image.endian);
+	while(i < mlx->y_map)
     {
         j = 0;
-        while(j < mlx.x_map)
+        while(j < mlx->x_map)
         {
-            if(j + 1 < mlx.x_map)
-                draw_line_dda(mlx, *map[i][j], *map[i][j + 1], map_dimension);
-            if(i + 1 < mlx.y_map)
-				draw_line_dda(mlx, *map[i][j], *map[i + 1][j], map_dimension);
+            if(j + 1 < mlx->x_map)
+                draw_line_dda(*mlx, *mlx->mlx_map[i][j], *mlx->mlx_map[i][j + 1]);
+            if(i + 1 < mlx->y_map)
+				draw_line_dda(*mlx, *mlx->mlx_map[i][j], *mlx->mlx_map[i + 1][j]);
 			j++;
         }
 		i++;
     }
-	clear_map(map, mlx.y_map);
-	mlx_put_image_to_window(mlx.mlx_ptr, mlx.mlx_window, mlx.image.img, 0, 0);
+	mlx_put_image_to_window(mlx->mlx_ptr, mlx->mlx_window, mlx->image.img, 0, 0);
+	return (1);
+}
+
+
+int calculate_dimension(t_mlx_data *mlx, double rotation[], int (*rotation_matrices)(t_mlx_data *, double[]))
+{
+	rotation_matrices(mlx, rotation);
+	mlx->width_dimension = return_x(mlx->mlx_map, mlx->x_map, mlx->y_map, &mlx->x_min);
+	mlx->height_dimension = return_y(mlx->mlx_map, mlx->x_map, mlx->y_map, &mlx->y_min);
 	
+	mlx->scale_x = (double)1000 / mlx->width_dimension ;
+	mlx->scale_y = (double)1000 / mlx->height_dimension ;
+
+	if (mlx->scale_x > 1)
+		mlx->scale_x = (double)500 / mlx->width_dimension ;
+	if (mlx->scale_y > 5)
+		mlx->scale_y = (double)500 / mlx->height_dimension ;
+
+	mlx->width_dimension *= mlx->scale_x;
+	mlx->width_dimension += 100;
+	mlx->height_dimension *= mlx->scale_y;
+	mlx->scale_y /= 1.5;
+	return (1);
+}
+
+
+int create_mlx(t_mlx_data mlx, t_details ***map, char *title)
+{
+	mlx.mlx_ptr = mlx_init();
+	if (!mlx.mlx_ptr)
+		ft_errno();
 	mlx.mlx_map = map;
+
+	double rotation[3];
+	rotation[0] = -(M_PI_4);
+	rotation[1] = atan(sqrt(2));
+	rotation[2] = 0;
 	
+	calculate_dimension(&mlx, rotation, rotation_matrices);
+	
+	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, mlx.width_dimension, mlx.height_dimension, title);
+	
+	create_image(&mlx);
+
 	mlx_key_hook(mlx.mlx_window, get_key, &mlx);
 	mlx_loop(mlx.mlx_ptr);
 	mlx_destroy_window(mlx.mlx_ptr, mlx.mlx_window);
@@ -680,7 +691,8 @@ int	main(int argc, char **argv)
 		{
 			map = valid_axis(argv[1], &mlx.x_map, &mlx.y_map);
 			if (map)
-				draw_map(mlx, map, argv[1]);
+				create_mlx(mlx, map, argv[1]);
+				// draw_map(mlx, map, argv[1]);
 		}
 		else
 			printf("Error : file error\n");//edit the ft_errno to excute the error
