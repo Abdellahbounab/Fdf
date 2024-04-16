@@ -520,7 +520,7 @@ t_details	***get_mlx_cpy(t_mlx_data *mlx)
 		cpy[i] = (t_details **) malloc (sizeof(t_details *) * mlx->x_map);
 		while (j < mlx->x_map)
 		{
-			cpy[i][j] = create_data(i + mlx->events.vertical, j + mlx->events.horizone, mlx->x_map, mlx->y_map);
+			cpy[i][j] = create_data(i + mlx->events.vertical, j + mlx->events.horizone, mlx->x_map, mlx->y_map + mlx->events.zoom);
 			cpy[i][j]->z = mlx->mlx_map[i][j]->z;
 			cpy[i][j]->color = mlx->mlx_map[i][j]->color;
 			j++;
@@ -669,6 +669,15 @@ int	get_key(int key, t_mlx_data *mlx)
 		rotation_matrices(mlx);
 		create_image(mlx);
 	}
+	else if (key == XK_p || key == XK_m)
+	{
+		if (key == XK_p)
+			mlx->events.zoom--;
+		if (key == XK_m)
+			mlx->events.zoom++;
+		rotation_matrices(mlx);
+		create_image(mlx);
+	}
 	else
 	{
 		mlx_destroy_window(mlx->mlx_ptr, mlx->mlx_window);
@@ -707,8 +716,7 @@ int	add_events(t_hook *events)
 	events->x_rotation = atan(sqrt(2));
 	events->horizone = 0;
 	events->vertical = 0;
-	events->zoom_in = 0;
-	events->zoom_out = 0;
+	events->zoom = 0;
 	return (1);
 }
 

@@ -43,8 +43,7 @@ typedef struct s_hook{
 	double	horizone;
 	double	vertical;
 
-	double	zoom_in;
-	double	zoom_out;
+	double	zoom;
 }	t_hook;
 
 typedef struct s_mlx_data{
