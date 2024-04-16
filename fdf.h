@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/09 18:43:35 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/16 15:30:47 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/16 22:40:34 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,6 @@ typedef struct s_hook{
 	double	zoom;
 
 	int		parallel;
-	int		conic;
 }	t_hook;
 
 typedef struct s_mlx_data{
@@ -104,20 +103,16 @@ typedef struct s_mlx_data{
 #endif
 
 #ifndef XK_p
-#define XK_p 46
+#define XK_p 35
 #endif
 
 
 #ifndef XK_m
-#define XK_m 35
+#define XK_m 46  
 #endif
 
 #ifndef XK_0
 #define XK_0 82
-#endif
-
-#ifndef XK_1
-#define XK_1 83
 #endif
 
 #ifndef XK_space

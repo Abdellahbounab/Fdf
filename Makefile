@@ -29,7 +29,7 @@ all: $(NAME)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@ 
 
 $(NAME): $(SRCS_OBJ)
-	$(CC) $(CFLAGS)  $(SRCS_OBJ) $(MLX_FLAGS) -o $(NAME) -fsanitize=address -g
+	$(CC) $(CFLAGS)  $(SRCS_OBJ) $(MLX_FLAGS) -o $(NAME)
  
 $(MLX_LIB):
 	@make -C /usr/library/

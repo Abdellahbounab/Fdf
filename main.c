@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/16 15:41:08 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/16 22:54:34 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,9 +152,12 @@ t_details *create_data(int y_val, int x_val, int arr_len, int max_y)
 	int plus;
 
 	axis = (t_details *) malloc (sizeof(t_details));
-	plus = 100 / max_y;
+	plus = 0;
+	if (max_y > 0)
+		plus = 100 / max_y;
 	if (max_y > 100)
-		plus = max_y / 10;
+		plus = 100;
+		printf("max_y : %d\n", max_y);
 	if (axis)
 	{
 		axis->y = y_val * plus;
@@ -434,7 +437,6 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 	p2.x += (data.x_min * data.scale_x) + 50;
 	p2.y *= data.scale_y;
 	p2.y += (data.y_min * data.scale_y) + 100;
-	p2.y += data.events.conic;
 	
  	printable.y = fabs(p2.y - p1.y);
 	printable.x = fabs(p2.x - p1.x);
@@ -617,6 +619,16 @@ int return_x(t_details ***map, int x_width, int y_width, int *x_min)
 	return (abs(max - min));
 }
 
+int	mlx_instruction_put(t_mlx_data mlx)
+{
+	mlx_string_put(mlx.mlx_ptr, mlx.mlx_window, 10, 10, 0xFF0000, "Instructions : ");
+	mlx_string_put(mlx.mlx_ptr, mlx.mlx_window, 15, 25, 255, "Rotation(z, x, y)");
+	mlx_string_put(mlx.mlx_ptr, mlx.mlx_window, 15, 40, 255, "Translate(<, ^, >, v)");
+	mlx_string_put(mlx.mlx_ptr, mlx.mlx_window, 15, 55, 255, "Zooooooom(p, m)");
+	mlx_string_put(mlx.mlx_ptr, mlx.mlx_window, 15, 70, 255, "Parallel(0)");
+	mlx_string_put(mlx.mlx_ptr, mlx.mlx_window, 15, 85, 255, "Extra(space)");
+	return (1);
+}
 
 int	create_image(t_mlx_data *mlx)
 {
@@ -631,8 +643,6 @@ int	create_image(t_mlx_data *mlx)
         j = 0;
         while(j < mlx->x_map)
         {
-			if (mlx->events.conic)
-				mlx->events.conic++;
             if(j + 1 < mlx->x_map)
                 draw_line_dda(*mlx, *mlx->mlx_map_cpy[i][j], *mlx->mlx_map_cpy[i][j + 1]);
             if(i + 1 < mlx->y_map)
@@ -643,6 +653,29 @@ int	create_image(t_mlx_data *mlx)
     }
 	free_axis(mlx->mlx_map_cpy, i);
 	mlx_put_image_to_window(mlx->mlx_ptr, mlx->mlx_window, mlx->image.img, 0, 0);
+	mlx_instruction_put(*mlx);
+	return (1);
+}
+
+int	get_key(int key, t_mlx_data *mlx);
+
+
+int	move_map(t_mlx_data *mlx, int projection)
+{ 
+	if (projection)
+	{
+		if (mlx->mlx_map[0][0]->x + mlx->events.horizone <= 0)
+			get_key(XK_Right, mlx);
+		if (mlx->mlx_map[0][mlx->x_map - 1]->x + mlx->events.horizone >= mlx->width_dimension)
+			get_key(XK_Left, mlx);
+		if (mlx->mlx_map[0][0]->y + mlx->events.vertical <= 0)
+			get_key(XK_Down, mlx);
+		if (mlx->mlx_map[mlx->y_map - 1][0]->y + mlx->events.vertical >= mlx->height_dimension)
+			get_key(XK_Up, mlx);
+		move_map(mlx, 1);
+	}
+	else
+		printf("here\n");
 	return (1);
 }
 
@@ -680,9 +713,9 @@ int	get_key(int key, t_mlx_data *mlx)
 	}
 	else if (key == XK_p || key == XK_m)
 	{
-		if (key == XK_p)
+		if (key == XK_p && mlx->events.zoom + mlx->y_map > 1)
 			mlx->events.zoom--;
-		if (key == XK_m)
+		if (key == XK_m && mlx->events.zoom + mlx->y_map < 100)
 			mlx->events.zoom++;
 		rotation_matrices(mlx);
 		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
@@ -704,22 +737,18 @@ int	get_key(int key, t_mlx_data *mlx)
 		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		create_image(mlx);
 	}
-	else if (key == XK_1)
+	else if (key == XK_space || key == 1)
 	{
-		if (mlx->events.conic)
-			mlx->events.conic = 0;
-		else
-			mlx->events.conic = 1;
-		rotation_matrices(mlx);
-		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
-		create_image(mlx);
-	}
-	else if (key == XK_space)
-	{
-		if (mlx->events.projection)
-			mlx->events.projection = 0;
-		else
+		if (!mlx->events.projection && key == XK_space)
+		{
 			mlx->events.projection = 1;
+			move_map(mlx, 1);
+		}
+		else
+		{
+			mlx->events.projection = 0;
+			move_map(mlx, 0);
+		}
 		rotation_matrices(mlx);
 		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		create_image(mlx);
@@ -765,7 +794,6 @@ int	add_events(t_hook *events)
 	events->vertical = 0;
 	events->zoom = 0;
 	events->parallel = 1;
-	events->conic = 0;
 	events->projection = 1;
 	return (1);
 } 
@@ -778,6 +806,8 @@ int exit_program(t_mlx_data *mlx)
 	exit(0);
 }
 
+
+
 int create_mlx(t_mlx_data mlx, t_details ***map, char *title)
 {
 	mlx.mlx_ptr = mlx_init();
@@ -789,7 +819,7 @@ int create_mlx(t_mlx_data mlx, t_details ***map, char *title)
 	calculate_dimension(&mlx);
 
 	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, mlx.width_dimension, mlx.height_dimension, title);
-	
+
 	create_image(&mlx);
 
 	mlx_key_hook(mlx.mlx_window, get_key, &mlx);
