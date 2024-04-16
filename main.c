@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/15 22:25:12 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/16 15:41:08 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,8 +278,10 @@ void free_axis(t_details ***map, int len)
 
 	i = 0;
 	cpy = *map;
-	while (cpy && i < len)
+	// printf("len:%d\n", len);
+	while (cpy && cpy[i] && i < len)
 	{
+		// printf("i:%d\n", i);
 		free(cpy[i]);
 		cpy[i] = NULL;
 		i++;
@@ -432,6 +434,7 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 	p2.x += (data.x_min * data.scale_x) + 50;
 	p2.y *= data.scale_y;
 	p2.y += (data.y_min * data.scale_y) + 100;
+	p2.y += data.events.conic;
 	
  	printable.y = fabs(p2.y - p1.y);
 	printable.x = fabs(p2.x - p1.x);
@@ -446,7 +449,7 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 
 	while (cpy_steps-- >= 0)
 	{
-		if (p1.x < data.width_dimension && p1.y < data.height_dimension)
+		if (p1.x < data.width_dimension && p1.y < data.height_dimension && p1.x > 0 && p1.y > 0)
 			my_mlx_pixel_put(&data, p1.x, p1.y, p1.color);
 		p1.color = put_color(anc_color, p2.color, steps, steps - cpy_steps);
 		if (p1.x != p2.x)
@@ -543,16 +546,19 @@ int	rotation_matrices(t_mlx_data *mlx)
 		j = 0;
 		while (j < mlx->x_map)
 		{
-			// rotate_by_z(&mlx->mlx_map[i][j], -(M_PI_4));
-			rotate_by_z(&mlx->mlx_map_cpy[i][j], mlx->events.z_rotation);
-			// rotate_by_x(&mlx->mlx_map_cpy[i][j], atan(sqrt(2)));
-			rotate_by_x(&mlx->mlx_map_cpy[i][j], mlx->events.x_rotation);
-			if (mlx->events.y_rotation)
-				rotate_by_y(&mlx->mlx_map_cpy[i][j], mlx->events.y_rotation);
+			if (mlx->events.projection)
+			{
+				if (mlx->events.parallel)
+					rotate_by_z(&mlx->mlx_map_cpy[i][j], mlx->events.z_rotation);
+				rotate_by_x(&mlx->mlx_map_cpy[i][j], mlx->events.x_rotation);
+				if (mlx->events.y_rotation)
+					rotate_by_y(&mlx->mlx_map_cpy[i][j], mlx->events.y_rotation);
+			}
 			j++;
 		}
 		i++;
 	}
+			printf("x:%.2f\n", mlx->events.x_rotation);
 	return (1);
 }
 
@@ -625,6 +631,8 @@ int	create_image(t_mlx_data *mlx)
         j = 0;
         while(j < mlx->x_map)
         {
+			if (mlx->events.conic)
+				mlx->events.conic++;
             if(j + 1 < mlx->x_map)
                 draw_line_dda(*mlx, *mlx->mlx_map_cpy[i][j], *mlx->mlx_map_cpy[i][j + 1]);
             if(i + 1 < mlx->y_map)
@@ -641,7 +649,6 @@ int	create_image(t_mlx_data *mlx)
 int	get_key(int key, t_mlx_data *mlx)
 {
 	// x11 keycode / x11.keysyms
-	mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 	
 	//ihave to hold all the keys and then update the values of mlx->events(positions) depending on each key hook
 	// ihave to look after the keywords macros to get them right
@@ -656,6 +663,7 @@ int	get_key(int key, t_mlx_data *mlx)
 		if (key == XK_Left)
 			mlx->events.horizone--;
 		rotation_matrices(mlx);
+		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		create_image(mlx);
 	}
 	else if (key == XK_z || key == XK_x || key == XK_y)
@@ -667,6 +675,7 @@ int	get_key(int key, t_mlx_data *mlx)
 		if (key == XK_y)
 			mlx->events.y_rotation += 0.5;
 		rotation_matrices(mlx);
+		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		create_image(mlx);
 	}
 	else if (key == XK_p || key == XK_m)
@@ -676,10 +685,48 @@ int	get_key(int key, t_mlx_data *mlx)
 		if (key == XK_m)
 			mlx->events.zoom++;
 		rotation_matrices(mlx);
+		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		create_image(mlx);
 	}
-	else
+	else if (key == XK_0)
 	{
+		if (mlx->events.parallel)
+		{
+			mlx->events.parallel = 0;
+			mlx->events.x_rotation = 1.585;
+		}
+		else
+		{
+			mlx->events.parallel = 1;
+			mlx->events.x_rotation = M_PI_4;
+		}
+		rotation_matrices(mlx);
+		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
+		create_image(mlx);
+	}
+	else if (key == XK_1)
+	{
+		if (mlx->events.conic)
+			mlx->events.conic = 0;
+		else
+			mlx->events.conic = 1;
+		rotation_matrices(mlx);
+		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
+		create_image(mlx);
+	}
+	else if (key == XK_space)
+	{
+		if (mlx->events.projection)
+			mlx->events.projection = 0;
+		else
+			mlx->events.projection = 1;
+		rotation_matrices(mlx);
+		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
+		create_image(mlx);
+	}
+	else if (key == 53)
+	{
+		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		mlx_destroy_window(mlx->mlx_ptr, mlx->mlx_window);
 		free_axis(mlx->mlx_map, mlx->y_map);
 		exit(0);
@@ -717,7 +764,18 @@ int	add_events(t_hook *events)
 	events->horizone = 0;
 	events->vertical = 0;
 	events->zoom = 0;
+	events->parallel = 1;
+	events->conic = 0;
+	events->projection = 1;
 	return (1);
+} 
+
+int exit_program(t_mlx_data *mlx)
+{
+	mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
+	mlx_destroy_window(mlx->mlx_ptr, mlx->mlx_window);
+	free_axis(mlx->mlx_map, mlx->y_map);
+	exit(0);
 }
 
 int create_mlx(t_mlx_data mlx, t_details ***map, char *title)
@@ -735,6 +793,7 @@ int create_mlx(t_mlx_data mlx, t_details ***map, char *title)
 	create_image(&mlx);
 
 	mlx_key_hook(mlx.mlx_window, get_key, &mlx);
+	mlx_hook(mlx.mlx_window, 17, 0, exit_program, &mlx);
 	mlx_loop(mlx.mlx_ptr);
 	mlx_destroy_window(mlx.mlx_ptr, mlx.mlx_window);
 	free(mlx.mlx_ptr);

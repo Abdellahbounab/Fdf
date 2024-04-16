@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/09 18:43:35 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/15 21:06:44 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/16 15:30:47 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <mlx.h>
 #include <math.h>
-#include <X11/keysym.h>
+// #include <X11/keysym.h>
 #include "get_next_line.h"
 
 typedef struct s_details{
@@ -43,7 +43,12 @@ typedef struct s_hook{
 	double	horizone;
 	double	vertical;
 
+	int		projection;
+
 	double	zoom;
+
+	int		parallel;
+	int		conic;
 }	t_hook;
 
 typedef struct s_mlx_data{
@@ -70,6 +75,54 @@ typedef struct s_mlx_data{
 	t_hook	events;
 } t_mlx_data;
 
+#ifndef XK_Up
+#define XK_Up 126
+#endif
+
+#ifndef XK_Down
+#define XK_Down 125
+#endif
+
+#ifndef XK_Right
+#define XK_Right 124
+#endif
+
+#ifndef XK_Left
+#define XK_Left 123
+#endif
+
+#ifndef XK_z
+#define XK_z 6
+#endif
+
+#ifndef XK_x
+#define XK_x 7
+#endif
+
+#ifndef XK_y
+#define XK_y 16
+#endif
+
+#ifndef XK_p
+#define XK_p 46
+#endif
+
+
+#ifndef XK_m
+#define XK_m 35
+#endif
+
+#ifndef XK_0
+#define XK_0 82
+#endif
+
+#ifndef XK_1
+#define XK_1 83
+#endif
+
+#ifndef XK_space
+#define XK_space 49
+#endif
 
 int	valid_file(char *name, char *fdf, int len);
 
