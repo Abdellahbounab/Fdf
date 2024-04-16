@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <mlx.h>
 #include <math.h>
+#include <X11/keysym.h>
 #include "get_next_line.h"
 
 typedef struct s_details{
@@ -34,20 +35,42 @@ typedef struct s_image{
 	int		endian;
 } t_image;
 
+typedef struct s_hook{
+	double	z_rotation;
+	double	x_rotation;
+	double	y_rotation;
+
+	double	horizone;
+	double	vertical;
+
+	double	zoom_in;
+	double	zoom_out;
+}	t_hook;
+
 typedef struct s_mlx_data{
 	void *mlx_ptr;
 	void *mlx_window;
+
 	int	x_map;
 	int	y_map;
+
 	double scale_x;
 	double scale_y;
+
 	int x_min;
 	int y_min;
+
 	int width_dimension;
 	int height_dimension;
+
 	t_image	image;
+
 	t_details ***mlx_map;
+	t_details ***mlx_map_cpy;
+
+	t_hook	events;
 } t_mlx_data;
+
 
 int	valid_file(char *name, char *fdf, int len);
 
