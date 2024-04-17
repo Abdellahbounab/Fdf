@@ -157,7 +157,7 @@ t_details *create_data(int y_val, int x_val, int arr_len, int max_y)
 		plus = 100 / max_y;
 	if (max_y > 100)
 		plus = 100;
-		printf("max_y : %d\n", max_y);
+	// printf("max_y : %d\n", max_y);
 	if (axis)
 	{
 		axis->y = y_val * plus;
@@ -429,14 +429,18 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 	
 
 	p1.x *= data.scale_x;
-	p1.x += (data.x_min * data.scale_x) + 50;
+	if (data.events.projection)
+		p1.x += (data.x_min * data.scale_x) + 50;
 	p1.y *= data.scale_y;
-	p1.y += (data.y_min * data.scale_y) + 100;
+	if (data.events.projection)
+		p1.y += (data.y_min * data.scale_y) + 100;
 	
 	p2.x *= data.scale_x;
-	p2.x += (data.x_min * data.scale_x) + 50;
+	if (data.events.projection)
+		p2.x += (data.x_min * data.scale_x) + 50;
 	p2.y *= data.scale_y;
-	p2.y += (data.y_min * data.scale_y) + 100;
+	if (data.events.projection)
+		p2.y += (data.y_min * data.scale_y) + 100;
 	
  	printable.y = fabs(p2.y - p1.y);
 	printable.x = fabs(p2.x - p1.x);
@@ -525,7 +529,7 @@ t_details	***get_mlx_cpy(t_mlx_data *mlx)
 		cpy[i] = (t_details **) malloc (sizeof(t_details *) * mlx->x_map);
 		while (j < mlx->x_map)
 		{
-			cpy[i][j] = create_data(i + mlx->events.vertical, j + mlx->events.horizone, mlx->x_map, mlx->y_map + mlx->events.zoom);
+				cpy[i][j] = create_data(i + mlx->events.vertical, j + mlx->events.horizone, mlx->x_map, mlx->y_map + mlx->events.zoom);
 			cpy[i][j]->z = mlx->mlx_map[i][j]->z;
 			cpy[i][j]->color = mlx->mlx_map[i][j]->color;
 			j++;
@@ -560,7 +564,6 @@ int	rotation_matrices(t_mlx_data *mlx)
 		}
 		i++;
 	}
-			printf("x:%.2f\n", mlx->events.x_rotation);
 	return (1);
 }
 
@@ -660,22 +663,37 @@ int	create_image(t_mlx_data *mlx)
 int	get_key(int key, t_mlx_data *mlx);
 
 
-int	move_map(t_mlx_data *mlx, int projection)
-{ 
-	if (projection)
+int	move_map(t_mlx_data *mlx)
+{
+	// int	key_x[2];
+	// int key_y[2];
+	double plus_x = 0.02;
+	double plus_y = 0.02;
+	int total = 0;
+
+	while (total < 2000)
 	{
-		if (mlx->mlx_map[0][0]->x + mlx->events.horizone <= 0)
-			get_key(XK_Right, mlx);
-		if (mlx->mlx_map[0][mlx->x_map - 1]->x + mlx->events.horizone >= mlx->width_dimension)
-			get_key(XK_Left, mlx);
-		if (mlx->mlx_map[0][0]->y + mlx->events.vertical <= 0)
-			get_key(XK_Down, mlx);
-		if (mlx->mlx_map[mlx->y_map - 1][0]->y + mlx->events.vertical >= mlx->height_dimension)
-			get_key(XK_Up, mlx);
-		move_map(mlx, 1);
+		if ((mlx->mlx_map[0][0]->x + mlx->events.horizone)<= 0)
+			plus_x = 0.02;
+		if ((mlx->mlx_map[0][mlx->x_map - 1]->x + mlx->events.horizone) * mlx->scale_x + 128 >= mlx->width_dimension)
+			plus_x = -0.02;
+		if ((mlx->mlx_map[0][0]->y + mlx->events.vertical) <= 0)
+			plus_y = 0.02;
+		if ((mlx->mlx_map[mlx->y_map - 1][0]->y + mlx->events.vertical) * mlx->scale_y + 105 >= mlx->height_dimension / 1.5)
+			plus_y = -0.02;
+
+
+		mlx->events.horizone += plus_x;
+		mlx->events.vertical += plus_y;
+
+		// printf("x:%.2f, %.2f	)\n", (mlx->mlx_map[mlx->y_map - 1][0]->y + mlx->events.vertical) * mlx->scale_y + 100, mlx->height_dimension / 1.5);
+		// printf("plus_x:%.2f - plus_y:%.2f/n", plus_x, plus_y);
+
+		total++;
+		rotation_matrices(mlx);
+		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
+		create_image(mlx);
 	}
-	else
-		printf("here\n");
 	return (1);
 }
 
@@ -737,18 +755,15 @@ int	get_key(int key, t_mlx_data *mlx)
 		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		create_image(mlx);
 	}
-	else if (key == XK_space || key == 1)
+	else if (key == XK_space)
 	{
-		if (!mlx->events.projection && key == XK_space)
-		{
-			mlx->events.projection = 1;
-			move_map(mlx, 1);
-		}
-		else
+		if (mlx->events.projection)
 		{
 			mlx->events.projection = 0;
-			move_map(mlx, 0);
+			move_map(mlx);
 		}
+		else
+			mlx->events.projection = 1;
 		rotation_matrices(mlx);
 		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		create_image(mlx);
@@ -819,6 +834,7 @@ int create_mlx(t_mlx_data mlx, t_details ***map, char *title)
 	calculate_dimension(&mlx);
 
 	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, mlx.width_dimension, mlx.height_dimension, title);
+	printf("with and hegith (%d, %d)\n", mlx.width_dimension, mlx.height_dimension);
 
 	create_image(&mlx);
 

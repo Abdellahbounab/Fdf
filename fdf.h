@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <mlx.h>
 #include <math.h>
-// #include <X11/keysym.h>
+#include <X11/keysym.h>
 #include "get_next_line.h"
 
 typedef struct s_details{
