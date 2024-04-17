@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/17 20:23:54 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/17 22:56:10 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,13 +91,10 @@ int	ft_atox(char *str)
 			val = ft_strchr("0123456789ABCDEF", str[i]);
 		else
 			val = ft_strchr("0123456789abcdef", str[i]);
-		if (val != -1)
-		{
-			num *= 16;
-			num += val;
-		}
-		else
+		if (val == -1)
 			break ;
+		num *= 16;
+		num += val;
 		i++;
 	}
 	if ((i < 8 || i == 8) && str[i])
@@ -287,7 +284,7 @@ void	free_axis(t_details ***map, int len)
 	cpy = NULL;
 }
 
-t_details	**extract_axis(char *ligne, int min_width, int y, int max_y)
+t_details	**extract_axis(char **ligne, int min_width, int y, int max_y)
 {
 	char		**arr;
 	int			x;
@@ -296,7 +293,9 @@ t_details	**extract_axis(char *ligne, int min_width, int y, int max_y)
 
 	x = 0;
 	len = 0;
-	arr = ft_split_space(ligne, " \t\n", &len);
+	arr = ft_split_space(*ligne, " \t\n", &len);
+	free(*ligne);
+	*ligne = NULL;
 	if (len >= min_width)
 	{
 		cpy = (t_details **)malloc(sizeof(t_details *) * len);
@@ -367,15 +366,14 @@ t_details	***valid_axis(char *file, int *x_map, int *y_map)
 	min_width = words_count(ligne, " \t\n");
 	while (ligne && *ligne)
 	{
-		cpy[i] = extract_axis(ligne, min_width, i, *y_map);
-		free(ligne);
+		cpy[i] = extract_axis(&ligne, min_width, i, *y_map);
 		if (!cpy[i])
 			return (clear_map(cpy, i - 1), ft_errno("failed", 1), NULL);
 		ligne = get_next_line(fd);
 		i++;
 	}
 	if (!min_width)
-		return (free(ligne), ft_errno("No data found.", 1), NULL);
+		return (ft_errno("No data found.", 1), NULL);
 	return (*y_map = i, *x_map = min_width, cpy);
 }
 
@@ -531,8 +529,8 @@ t_details	***get_mlx_cpy(t_mlx_data *mlx)
 	cpy = (t_details ***)malloc(sizeof(t_details **) * mlx->y_map);
 	if (!cpy)
 		return (NULL);
-	i = 0;
-	while (i < mlx->y_map)
+	i = -1;
+	while (++i < mlx->y_map)
 	{
 		j = 0;
 		cpy[i] = (t_details **)malloc(sizeof(t_details *) * mlx->x_map);
@@ -549,7 +547,6 @@ t_details	***get_mlx_cpy(t_mlx_data *mlx)
 				cpy[i][j]->color = mlx->mlx_map[i][j]->color;
 			j++;
 		}
-		i++;
 	}
 	return (cpy);
 }

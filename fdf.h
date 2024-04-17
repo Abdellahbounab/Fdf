@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/09 18:43:35 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/17 20:20:01 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/17 22:53:59 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,7 @@ char		*ft_strdups(char **str, int len);
 
 char		**ft_split_space(char *str, char *charset, int *len);
 
-t_details	**extract_axis(char *ligne, int min_width, int x, int y_max);
+t_details	**extract_axis(char **ligne, int min_width, int x, int y_max);
 
 t_details	***valid_axis(char *file, int *x_map, int *y_map);
 
