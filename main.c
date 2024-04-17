@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/07 21:19:24 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/16 22:54:34 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/17 20:23:54 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,25 +14,22 @@
 
 // https://github.com/ailopez-o/42Barcelona-FdF
 
-void	read_map(t_details **map)
+int	ft_errno(char *str, int sign)
 {
-	int i = 0;
-	int len = 0;
-	
-	if (map[0])
-		len = map[0]->length;
-	while (i < len)
+	if (!sign)
 	{
-		printf("(%d, %.2f, %.2f)", map[i]->z, map[i]->x, map[i]->y);
-		i++;
+		write(1, "\033[32mSuccess: ", 15);
+		write(1, str, ft_strlen(str));
+		write(1, "\033[0m", 4);
 	}
-	printf("\n");
-}
-
-void	ft_errno(void)
-{
-	write (2, "Error\n", 6);
-	exit(EXIT_FAILURE);
+	else
+	{
+		write(1, "\033[31mError: ", 13);
+		write(1, str, ft_strlen(str));
+		write(1, "\033[0m", 4);
+	}
+	exit(sign);
+	return (0);
 }
 
 void	free_arr(char **arr, int len)
@@ -43,9 +40,11 @@ void	free_arr(char **arr, int len)
 	while (arr && arr[i] && i < len)
 	{
 		free(arr[i]);
+		arr[i] = NULL;
 		i++;
 	}
 	free(arr);
+	arr = NULL;
 }
 
 int	ft_strncmp(char *str, char *cmp, int len)
@@ -82,14 +81,14 @@ int	ft_atox(char *str)
 {
 	int	num;
 	int	val;
-	int i;
+	int	i;
 
 	num = 0;
 	i = 2;
 	while (str && str[i] && i < 8)
 	{
 		if (str[i] >= 'A' && str[i] <= 'F')
-			val = ft_strchr("0123456789ABCDEF" ,str[i]);
+			val = ft_strchr("0123456789ABCDEF", str[i]);
 		else
 			val = ft_strchr("0123456789abcdef", str[i]);
 		if (val != -1)
@@ -98,10 +97,10 @@ int	ft_atox(char *str)
 			num += val;
 		}
 		else
-			break;
+			break ;
 		i++;
 	}
-	if (( i < 8 || i == 8) && str[i])
+	if ((i < 8 || i == 8) && str[i])
 		num = 0;
 	while (str && str[i] && (str[i] == ' ' || str[i] == '\t'))
 		i++;
@@ -112,7 +111,7 @@ int	ft_atoi(char *str)
 {
 	int	num;
 	int	sign;
-	int i;
+	int	i;
 
 	num = 0;
 	sign = 1;
@@ -134,9 +133,9 @@ int	ft_atoi(char *str)
 	return (num * sign);
 }
 
-int	  get_value(char *str) //have to implements the hexa part
+int	get_value(char *str)
 {
-	int num;
+	int	num;
 
 	num = 0;
 	if (ft_strncmp(str, "0x", 2))
@@ -146,18 +145,15 @@ int	  get_value(char *str) //have to implements the hexa part
 	return (num);
 }
 
-t_details *create_data(int y_val, int x_val, int arr_len, int max_y)
+t_details	*create_data(int y_val, int x_val, int arr_len, int max_y)
 {
-	t_details *axis;
-	int plus;
+	t_details	*axis;
+	int			plus;
 
-	axis = (t_details *) malloc (sizeof(t_details));
-	plus = 0;
-	if (max_y > 0)
+	axis = (t_details *)malloc(sizeof(t_details));
+	plus = 100;
+	if (max_y < 100)
 		plus = 100 / max_y;
-	if (max_y > 100)
-		plus = 100;
-	// printf("max_y : %d\n", max_y);
 	if (axis)
 	{
 		axis->y = y_val * plus;
@@ -169,11 +165,11 @@ t_details *create_data(int y_val, int x_val, int arr_len, int max_y)
 	return (axis);
 }
 
-t_details *get_data(char *str, int y_val, int x_val, int arr_len, int max_y)
+t_details	*get_data(char *str, int y_val, int x_val, int arr_len, int max_y)
 {
-	t_details *axis;
-	char **arr;
-	int	len;
+	t_details	*axis;
+	char		**arr;
+	int			len;
 
 	len = 0;
 	arr = ft_split_space(str, " ,", &len);
@@ -197,14 +193,15 @@ int	words_count(char *str, char *charset)
 	int	len;
 
 	len = 0;
-	if (*str && ft_strchr(charset, *str) == -1)
+	if (str && *str && ft_strchr(charset, *str) == -1)
 	{
 		len++;
 		str++;
 	}
-	while (*str)
+	while (str && *str)
 	{
-		if (*str && ft_strchr(charset, *str) == -1 && ft_strchr(charset , *(str - 1)) != -1)
+		if (*str && ft_strchr(charset, *str) == -1 && ft_strchr(charset, *(str
+					- 1)) != -1)
 			len++;
 		str++;
 	}
@@ -232,7 +229,7 @@ char	*ft_strdups(char **str, int len)
 	int		i;
 
 	i = 0;
-	cpy = (char *) malloc (sizeof(char) * (len + 1));
+	cpy = (char *)malloc(sizeof(char) * (len + 1));
 	if (!cpy)
 		return (NULL);
 	while (*str && i < len)
@@ -253,10 +250,9 @@ char	**ft_split_space(char *str, char *charset, int *len)
 	*len = words_count(str, charset);
 	if (str && *len)
 	{
-		arr = (char **) malloc (sizeof(char *) * (*len + 1));
+		arr = (char **)malloc(sizeof(char *) * (*len + 1));
 		if (!arr)
 			return (NULL);
-		
 		while (str && *str && i < *len)
 		{
 			while (*str && ft_strchr(charset, *str) != -1)
@@ -274,37 +270,36 @@ char	**ft_split_space(char *str, char *charset, int *len)
 	return (0);
 }
 
-void free_axis(t_details ***map, int len)
+void	free_axis(t_details ***map, int len)
 {
-	int i;
-	t_details **cpy;
+	int			i;
+	t_details	**cpy;
 
 	i = 0;
 	cpy = *map;
-	// printf("len:%d\n", len);
 	while (cpy && cpy[i] && i < len)
 	{
-		// printf("i:%d\n", i);
 		free(cpy[i]);
 		cpy[i] = NULL;
 		i++;
 	}
 	free(cpy);
+	cpy = NULL;
 }
 
-t_details **extract_axis(char *ligne, int min_width, int y, int max_y)
+t_details	**extract_axis(char *ligne, int min_width, int y, int max_y)
 {
-	char **arr;
-	int	x;
-	int len;
-	t_details **cpy;
+	char		**arr;
+	int			x;
+	int			len;
+	t_details	**cpy;
 
 	x = 0;
 	len = 0;
-	arr = ft_split_space(ligne, " \t\n",&len);
+	arr = ft_split_space(ligne, " \t\n", &len);
 	if (len >= min_width)
 	{
-		cpy = (t_details **) malloc (sizeof(t_details *) * len);
+		cpy = (t_details **)malloc(sizeof(t_details *) * len);
 		if (!cpy)
 			return (free_arr(arr, len), NULL);
 		while (x < len)
@@ -319,26 +314,26 @@ t_details **extract_axis(char *ligne, int min_width, int y, int max_y)
 	return (free_arr(arr, len), NULL);
 }
 
-void clear_map(t_details ***map, int len)
+void	clear_map(t_details ***map, int len)
 {
-	int i;
+	int	i;
 
 	i = 0;
-	while (i < len)
+	while (map[i] && i < len)
 	{
 		free_axis(map + i, (*map[i])->length);
 		i++;
 	}
 }
 
-int count_lignes(char *file, int *y_map)
+int	count_lignes(char *file, int *y_map)
 {
-	int fd ;
-	int len;
-	char *str;
+	int		fd;
+	int		len;
+	char	*str;
 
 	len = 0;
-	fd = open (file, O_RDONLY);
+	fd = open(file, O_RDONLY);
 	str = get_next_line(fd);
 	if (fd != -1)
 	{
@@ -356,14 +351,15 @@ int count_lignes(char *file, int *y_map)
 
 t_details	***valid_axis(char *file, int *x_map, int *y_map)
 {
-	int		fd;
-	int		min_width;
-	char	*ligne;
-	int		i;
-	t_details ***cpy;
+	int			fd;
+	int			min_width;
+	char		*ligne;
+	int			i;
+	t_details	***cpy;
 
 	i = 0;
-	cpy = (t_details ***) malloc (sizeof(t_details **) * count_lignes(file, y_map));
+	cpy = (t_details ***)malloc(sizeof(t_details **) * count_lignes(file,
+				y_map));
 	if (!cpy)
 		return (NULL);
 	fd = open(file, O_RDONLY);
@@ -372,20 +368,20 @@ t_details	***valid_axis(char *file, int *x_map, int *y_map)
 	while (ligne && *ligne)
 	{
 		cpy[i] = extract_axis(ligne, min_width, i, *y_map);
-		if (!cpy[i])
-			return (free(ligne), clear_map(cpy, i - 1), ft_errno(), NULL);
 		free(ligne);
+		if (!cpy[i])
+			return (clear_map(cpy, i - 1), ft_errno("failed", 1), NULL);
 		ligne = get_next_line(fd);
 		i++;
 	}
 	if (!min_width)
-		return (free(ligne), ft_errno(), NULL);
+		return (free(ligne), ft_errno("No data found.", 1), NULL);
 	return (*y_map = i, *x_map = min_width, cpy);
 }
 
 int	valid_file(char *name, char *fdf, int len)
 {
-	int fd;
+	int	fd;
 
 	if (ft_strncmp(name + len - 4, fdf, 4))
 	{
@@ -400,33 +396,33 @@ int	valid_file(char *name, char *fdf, int len)
 int	put_color(int color1, int color2, int steps, int px)
 {
 	double	colors[3];
-	
-	colors[0] = ((((color2 >> 16) & 0xFF) - ((color1 >> 16) & 0xFF))) /  (double) steps;
-	colors[1] = ((((color2 >> 8) & 0xFF) - ((color1 >> 8) & 0xFF)) / (double) steps);
-	colors[2] = ((((color2) & 0xFF) - ((color1) & 0xFF)) / (double) steps);
 
+	colors[0] = (((((color2 >> 16) & 0xFF) - ((color1 >> 16) & 0xFF)))
+			/ (double)steps);
+	colors[1] = ((((color2 >> 8) & 0xFF) - ((color1 >> 8) & 0xFF))
+			/ (double)steps);
+	colors[2] = ((((color2) & 0xFF) - ((color1) & 0xFF)) / (double)steps);
 	colors[0] = ((color1 >> 16) & 0xFF) + (int)round(px * (colors[0]));
 	colors[1] = ((color1 >> 8) & 0xFF) + (int)round(px * colors[1]);
 	colors[2] = ((color1) & 0xFF) + (int)round(px * colors[2]);
-	
-
 	return ((int)colors[0] << 16 | (int)colors[1] << 8 | (int)colors[2]);
 }
-
 
 void	my_mlx_pixel_put(t_mlx_data *data, int x, int y, int color)
 {
 	char	*dst;
 
-	dst = data->image.addr + (y * data->image.line_length + x * (data->image.bits_per_pixel / 8)); 
-	*(unsigned int*)dst = color;
+	dst = data->image.addr + (y * data->image.line_length + x
+			* (data->image.bit_px / 8));
+	*(unsigned int *)dst = color;
 }
 
-int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
+void	dda(t_mlx_data data, t_details p1, t_details p2)
 {
 	t_details	printable;
-	double 		steps;
-	
+	double		steps;
+	int			cpy_steps;
+	int			anc_color;
 
 	p1.x *= data.scale_x;
 	if (data.events.projection)
@@ -434,28 +430,27 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 	p1.y *= data.scale_y;
 	if (data.events.projection)
 		p1.y += (data.y_min * data.scale_y) + 100;
-	
 	p2.x *= data.scale_x;
 	if (data.events.projection)
 		p2.x += (data.x_min * data.scale_x) + 50;
 	p2.y *= data.scale_y;
 	if (data.events.projection)
 		p2.y += (data.y_min * data.scale_y) + 100;
-	
- 	printable.y = fabs(p2.y - p1.y);
+
+	printable.y = fabs(p2.y - p1.y);
 	printable.x = fabs(p2.x - p1.x);
 	steps = sqrt(pow(printable.y, 2) + pow(printable.x, 2));
 	printable.x /= steps;
 	printable.x *= p1.x < p2.x ? 1 : -1;
 	printable.y /= steps;
 	printable.y *= p1.y < p2.y ? 1 : -1;
-	
-	int cpy_steps = steps;
-	int anc_color = p1.color;
 
+	cpy_steps = steps;
+	anc_color = p1.color;
 	while (cpy_steps-- >= 0)
 	{
-		if (p1.x < data.width_dimension && p1.y < data.height_dimension && p1.x > 0 && p1.y > 0)
+		if (p1.x < data.width_dimension && p1.y < data.height_dimension
+			&& p1.x > 0 && p1.y > 0)
 			my_mlx_pixel_put(&data, p1.x, p1.y, p1.color);
 		p1.color = put_color(anc_color, p2.color, steps, steps - cpy_steps);
 		if (p1.x != p2.x)
@@ -463,90 +458,109 @@ int draw_line_dda(t_mlx_data data, t_details p1, t_details p2)
 		if (p1.y != p2.y)
 			p1.y += printable.y;
 	}
-	return (1);
 }
 
-void rotate_by_z(t_details **map, double raduis)
+void	rotate_by_z(t_details **map, double raduis)
 {
-	int cpy_x;	
-	int cpy_y;	
-	int cpy_z;
-	
+	int	cpy_x;
+	int	cpy_y;
+	int	cpy_z;
+
 	cpy_x = (*map)->x;
 	cpy_y = (*map)->y;
 	cpy_z = (*map)->z;
-		
 	(*map)->x = cos(raduis) * cpy_x + -sin(raduis) * cpy_y + 0 * cpy_z;
 	(*map)->y = sin(raduis) * cpy_x + cos(raduis) * cpy_y + 0 * cpy_z;
 	(*map)->z = 0 * cpy_z + 0 * cpy_y + 1 * cpy_z;
 }
 
-void rotate_by_x(t_details **map, double raduis)
+void	rotate_by_x(t_details **map, double raduis)
 {
-	int cpy_x;	
-	int cpy_y;	
-	int cpy_z;
-	
+	int	cpy_x;
+	int	cpy_y;
+	int	cpy_z;
+
 	cpy_x = (*map)->x;
 	cpy_y = (*map)->y;
 	cpy_z = (*map)->z;
-		
 	(*map)->x = 1 * cpy_x + 0 * cpy_y + 0 * cpy_z;
 	(*map)->y = 0 * cpy_x + cos(raduis) * cpy_y + -sin(raduis) * cpy_z;
 	(*map)->z = 0 * cpy_z + sin(raduis) * cpy_y + cos(raduis) * cpy_z;
 }
 
-void rotate_by_y(t_details **map, double raduis)
+void	rotate_by_y(t_details **map, double raduis)
 {
-	int cpy_x;	
-	int cpy_y;	
-	int cpy_z;
-	
+	int	cpy_x;
+	int	cpy_y;
+	int	cpy_z;
+
 	cpy_x = (*map)->x;
 	cpy_y = (*map)->y;
 	cpy_z = (*map)->z;
-		
 	(*map)->x = cos(raduis) * cpy_x + 0 * cpy_y + sin(raduis) * cpy_z;
 	(*map)->y = 0 * cpy_x + 1 * cpy_y + 0 * cpy_z;
 	(*map)->z = -sin(raduis) * cpy_z + 0 * cpy_y + cos(raduis) * cpy_z;
 }
+int	increase(t_details **data, int zoom)
+{
+	int	old_plus;
 
+	old_plus = (*data)->z;
+	if (old_plus + zoom > 0)
+	{
+		(*data)->x = (*data)->x / old_plus * (old_plus + zoom);
+		(*data)->y = (*data)->y / old_plus * (old_plus + zoom);
+		(*data)->z = old_plus + zoom;
+	}
+	else
+	{
+		(*data)->x = 0;
+		(*data)->y = 0;
+		(*data)->z = 0;
+	}
+	return (1);
+}
 
 //this function have to be handlede for errors
 t_details	***get_mlx_cpy(t_mlx_data *mlx)
 {
 	t_details	***cpy;
-	int	i;
-	int	j;
+	int			i;
+	int			j;
 
-	cpy = (t_details ***) malloc (sizeof(t_details **) * mlx->y_map);
+	cpy = (t_details ***)malloc(sizeof(t_details **) * mlx->y_map);
 	if (!cpy)
 		return (NULL);
 	i = 0;
 	while (i < mlx->y_map)
 	{
 		j = 0;
-		cpy[i] = (t_details **) malloc (sizeof(t_details *) * mlx->x_map);
+		cpy[i] = (t_details **)malloc(sizeof(t_details *) * mlx->x_map);
 		while (j < mlx->x_map)
 		{
-				cpy[i][j] = create_data(i + mlx->events.vertical, j + mlx->events.horizone, mlx->x_map, mlx->y_map + mlx->events.zoom);
-			cpy[i][j]->z = mlx->mlx_map[i][j]->z;
-			cpy[i][j]->color = mlx->mlx_map[i][j]->color;
+			cpy[i][j] = create_data(i + mlx->events.vertical, j
+					+ mlx->events.horizone, mlx->x_map, mlx->y_map);
+			increase(&cpy[i][j], mlx->events.zoom);
+			if (cpy[i][j]->z)
+				cpy[i][j]->z = mlx->mlx_map[i][j]->z;
+			if (mlx->events.coloring && cpy[i][j]->z <= 0)
+				cpy[i][j]->color = 0;
+			else
+				cpy[i][j]->color = mlx->mlx_map[i][j]->color;
 			j++;
 		}
 		i++;
 	}
 	return (cpy);
-
 }
 
 int	rotation_matrices(t_mlx_data *mlx)
 {
-	int i;
-	int j;
+	int	i;
+	int	j;
 
 	i = 0;
-	mlx->mlx_map_cpy = get_mlx_cpy(mlx);
+	mlx->map_cpy = get_mlx_cpy(mlx);
 	while (i < mlx->y_map)
 	{
 		j = 0;
@@ -555,10 +569,12 @@ int	rotation_matrices(t_mlx_data *mlx)
 			if (mlx->events.projection)
 			{
 				if (mlx->events.parallel)
-					rotate_by_z(&mlx->mlx_map_cpy[i][j], mlx->events.z_rotation);
-				rotate_by_x(&mlx->mlx_map_cpy[i][j], mlx->events.x_rotation);
+					rotate_by_z(&mlx->map_cpy[i][j],
+						mlx->events.z_rotation);
+				rotate_by_x(&mlx->map_cpy[i][j], mlx->events.x_rotation);
 				if (mlx->events.y_rotation)
-					rotate_by_y(&mlx->mlx_map_cpy[i][j], mlx->events.y_rotation);
+					rotate_by_y(&mlx->map_cpy[i][j],
+						mlx->events.y_rotation);
 			}
 			j++;
 		}
@@ -567,13 +583,12 @@ int	rotation_matrices(t_mlx_data *mlx)
 	return (1);
 }
 
-
 int	return_y(t_details ***map, int x_width, int y_width, int *y_min)
 {
 	int	i;
 	int	j;
-	int min;
-	int max;
+	int	min;
+	int	max;
 
 	i = 0;
 	min = map[i][i]->y;
@@ -595,12 +610,12 @@ int	return_y(t_details ***map, int x_width, int y_width, int *y_min)
 	return (abs(max - min));
 }
 
-int return_x(t_details ***map, int x_width, int y_width, int *x_min)
+int	return_x(t_details ***map, int x_width, int y_width, int *x_min)
 {
 	int	i;
 	int	j;
-	int min;
-	int max;
+	int	min;
+	int	max;
 
 	i = 0;
 	min = map[i][i]->x;
@@ -624,122 +639,88 @@ int return_x(t_details ***map, int x_width, int y_width, int *x_min)
 
 int	mlx_instruction_put(t_mlx_data mlx)
 {
-	mlx_string_put(mlx.mlx_ptr, mlx.mlx_window, 10, 10, 0xFF0000, "Instructions : ");
-	mlx_string_put(mlx.mlx_ptr, mlx.mlx_window, 15, 25, 255, "Rotation(z, x, y)");
-	mlx_string_put(mlx.mlx_ptr, mlx.mlx_window, 15, 40, 255, "Translate(<, ^, >, v)");
-	mlx_string_put(mlx.mlx_ptr, mlx.mlx_window, 15, 55, 255, "Zooooooom(p, m)");
-	mlx_string_put(mlx.mlx_ptr, mlx.mlx_window, 15, 70, 255, "Parallel(0)");
-	mlx_string_put(mlx.mlx_ptr, mlx.mlx_window, 15, 85, 255, "Extra(space)");
+	void	*ptr;
+	void	*window;
+
+	ptr = mlx.mlx_ptr;
+	window = mlx.mlx_window;
+	mlx_string_put(ptr, window, 10, 10, 0xFF0000, "Instructions :");
+	mlx_string_put(ptr, window, 15, 25, 255, "Rotation(z, x, y)");
+	mlx_string_put(ptr, window, 15, 40, 255, "Translate(<,^, >, v)");
+	mlx_string_put(ptr, window, 15, 55, 255, "Zooooooom(p, m)");
+	mlx_string_put(ptr, window, 15, 70, 255, "Parallel(0)");
+	mlx_string_put(ptr, window, 15, 85, 255, "Extra(space/delete)");
 	return (1);
 }
 
-int	create_image(t_mlx_data *mlx)
+void	create_image(t_mlx_data *mlx)
 {
-	int i;
-	int j;
-	
+	int	i;
+	int	j;
+
 	i = 0;
-	mlx->image.img = mlx_new_image(mlx->mlx_ptr, mlx->width_dimension, mlx->height_dimension);
-	mlx->image.addr = mlx_get_data_addr(mlx->image.img, &mlx->image.bits_per_pixel, &mlx->image.line_length, &mlx->image.endian);
-	while(i < mlx->y_map)
-    {
-        j = 0;
-        while(j < mlx->x_map)
-        {
-            if(j + 1 < mlx->x_map)
-                draw_line_dda(*mlx, *mlx->mlx_map_cpy[i][j], *mlx->mlx_map_cpy[i][j + 1]);
-            if(i + 1 < mlx->y_map)
-				draw_line_dda(*mlx, *mlx->mlx_map_cpy[i][j], *mlx->mlx_map_cpy[i + 1][j]);
-			j++;
-        }
-		i++;
-    }
-	free_axis(mlx->mlx_map_cpy, i);
-	mlx_put_image_to_window(mlx->mlx_ptr, mlx->mlx_window, mlx->image.img, 0, 0);
-	mlx_instruction_put(*mlx);
-	return (1);
-}
-
-int	get_key(int key, t_mlx_data *mlx);
-
-
-int	move_map(t_mlx_data *mlx)
-{
-	// int	key_x[2];
-	// int key_y[2];
-	double plus_x = 0.02;
-	double plus_y = 0.02;
-	int total = 0;
-
-	while (total < 2000)
+	mlx->image.img = mlx_new_image(mlx->mlx_ptr, mlx->width_dimension,
+			mlx->height_dimension);
+	mlx->image.addr = mlx_get_data_addr(mlx->image.img, &mlx->image.bit_px, 
+			&mlx->image.line_length, &mlx->image.endian);
+	while (i < mlx->y_map)
 	{
-		if ((mlx->mlx_map[0][0]->x + mlx->events.horizone)<= 0)
-			plus_x = 0.02;
-		if ((mlx->mlx_map[0][mlx->x_map - 1]->x + mlx->events.horizone) * mlx->scale_x + 128 >= mlx->width_dimension)
-			plus_x = -0.02;
-		if ((mlx->mlx_map[0][0]->y + mlx->events.vertical) <= 0)
-			plus_y = 0.02;
-		if ((mlx->mlx_map[mlx->y_map - 1][0]->y + mlx->events.vertical) * mlx->scale_y + 105 >= mlx->height_dimension / 1.5)
-			plus_y = -0.02;
-
-
-		mlx->events.horizone += plus_x;
-		mlx->events.vertical += plus_y;
-
-		// printf("x:%.2f, %.2f	)\n", (mlx->mlx_map[mlx->y_map - 1][0]->y + mlx->events.vertical) * mlx->scale_y + 100, mlx->height_dimension / 1.5);
-		// printf("plus_x:%.2f - plus_y:%.2f/n", plus_x, plus_y);
-
-		total++;
-		rotation_matrices(mlx);
-		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
-		create_image(mlx);
+		j = 0;
+		while (j < mlx->x_map)
+		{
+			if (j + 1 < mlx->x_map)
+				dda(*mlx, *mlx->map_cpy[i][j], *mlx->map_cpy[i][j + 1]);
+			if (i + 1 < mlx->y_map)
+				dda(*mlx, *mlx->map_cpy[i][j], *mlx->map_cpy[i + 1][j]);
+			j++;
+		}
+		i++;
 	}
-	return (1);
+	clear_map(mlx->map_cpy, i);
+	mlx_put_image_to_window(mlx->mlx_ptr, mlx->mlx_window, mlx->image.img, 0,
+		0);
+	mlx_instruction_put(*mlx);
 }
 
 int	get_key(int key, t_mlx_data *mlx)
 {
-	// x11 keycode / x11.keysyms
-	
-	//ihave to hold all the keys and then update the values of mlx->events(positions) depending on each key hook
-	// ihave to look after the keywords macros to get them right
-	if (key == XK_Up || key == XK_Down || key == XK_Right || key == XK_Left)
+	if (key == UP || key == DOWN || key == RIGHT || key == LEFT)
 	{
-		if (key == XK_Up)
+		if (key == UP)
 			mlx->events.vertical--;
-		if (key == XK_Down)
+		if (key == DOWN)
 			mlx->events.vertical++;
-		if (key == XK_Right)
+		if (key == RIGHT)
 			mlx->events.horizone++;
-		if (key == XK_Left)
+		if (key == LEFT)
 			mlx->events.horizone--;
 		rotation_matrices(mlx);
 		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		create_image(mlx);
 	}
-	else if (key == XK_z || key == XK_x || key == XK_y)
+	else if (key == Z_BTN || key == X_BTN || key == Y_BTN)
 	{
-		if (key == XK_z)
+		if (key == Z_BTN)
 			mlx->events.z_rotation -= 0.05;
-		if (key == XK_x)
+		if (key == X_BTN)
 			mlx->events.x_rotation += 0.5;
-		if (key == XK_y)
+		if (key == Y_BTN)
 			mlx->events.y_rotation += 0.5;
 		rotation_matrices(mlx);
 		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		create_image(mlx);
 	}
-	else if (key == XK_p || key == XK_m)
+	else if (key == ZOOM_IN || key == ZOOM_OUT)
 	{
-		if (key == XK_p && mlx->events.zoom + mlx->y_map > 1)
-			mlx->events.zoom--;
-		if (key == XK_m && mlx->events.zoom + mlx->y_map < 100)
-			mlx->events.zoom++;
+		if (key == ZOOM_IN)
+			mlx->events.zoom += 0.5;
+		if (key == ZOOM_OUT)
+			mlx->events.zoom -= 0.5;
 		rotation_matrices(mlx);
 		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		create_image(mlx);
 	}
-	else if (key == XK_0)
+	else if (key == BTN_0)
 	{
 		if (mlx->events.parallel)
 		{
@@ -755,44 +736,49 @@ int	get_key(int key, t_mlx_data *mlx)
 		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		create_image(mlx);
 	}
-	else if (key == XK_space)
+	else if (key == EXTRA)
 	{
 		if (mlx->events.projection)
-		{
 			mlx->events.projection = 0;
-			move_map(mlx);
-		}
 		else
 			mlx->events.projection = 1;
 		rotation_matrices(mlx);
 		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		create_image(mlx);
 	}
-	else if (key == 53)
+	else if (key == COLORING)
+	{
+		if (mlx->events.coloring)
+			mlx->events.coloring = 0;
+		else
+			mlx->events.coloring = 1;
+		rotation_matrices(mlx);
+		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
+		create_image(mlx);
+	}
+	else if (key == ESC)
 	{
 		mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 		mlx_destroy_window(mlx->mlx_ptr, mlx->mlx_window);
-		free_axis(mlx->mlx_map, mlx->y_map);
-		exit(0);
+		clear_map(mlx->mlx_map, mlx->y_map);
+		ft_errno("Windows Closed", 0);
 	}
-	printf("key pressed : %d\n", key);
 	return (1);
 }
 
-int calculate_dimension(t_mlx_data *mlx)
+int	calculate_dimension(t_mlx_data *mlx)
 {
 	rotation_matrices(mlx);
-	mlx->width_dimension = return_x(mlx->mlx_map_cpy, mlx->x_map, mlx->y_map, &mlx->x_min);
-	mlx->height_dimension = return_y(mlx->mlx_map_cpy, mlx->x_map, mlx->y_map, &mlx->y_min);
-	
-	mlx->scale_x = (double)1000 / mlx->width_dimension ;
-	mlx->scale_y = (double)1000 / mlx->height_dimension ;
-
+	mlx->width_dimension = return_x(mlx->map_cpy, mlx->x_map, mlx->y_map,
+			&mlx->x_min);
+	mlx->height_dimension = return_y(mlx->map_cpy, mlx->x_map, mlx->y_map,
+			&mlx->y_min);
+	mlx->scale_x = (double)1000 / mlx->width_dimension;
+	mlx->scale_y = (double)1000 / mlx->height_dimension;
 	if (mlx->scale_x > 1)
-		mlx->scale_x = (double)500 / mlx->width_dimension ;
+		mlx->scale_x = (double)500 / mlx->width_dimension;
 	if (mlx->scale_y > 5)
-		mlx->scale_y = (double)500 / mlx->height_dimension ;
-
+		mlx->scale_y = (double)500 / mlx->height_dimension;
 	mlx->width_dimension *= mlx->scale_x;
 	mlx->width_dimension += 100;
 	mlx->height_dimension *= mlx->scale_y;
@@ -810,51 +796,46 @@ int	add_events(t_hook *events)
 	events->zoom = 0;
 	events->parallel = 1;
 	events->projection = 1;
+	events->coloring = 0;
 	return (1);
-} 
+}
 
-int exit_program(t_mlx_data *mlx)
+int	exit_program(t_mlx_data *mlx)
 {
 	mlx_destroy_image(mlx->mlx_ptr, mlx->image.img);
 	mlx_destroy_window(mlx->mlx_ptr, mlx->mlx_window);
-	free_axis(mlx->mlx_map, mlx->y_map);
-	exit(0);
+	clear_map(mlx->mlx_map, mlx->y_map);
+	return (ft_errno("Windows Closed", 0));
 }
 
-
-
-int create_mlx(t_mlx_data mlx, t_details ***map, char *title)
+int	create_mlx(t_mlx_data mlx, t_details ***map, char *title)
 {
 	mlx.mlx_ptr = mlx_init();
 	if (!mlx.mlx_ptr)
-		ft_errno();
+		ft_errno("mlx failed", 1);
 	mlx.mlx_map = map;
 	add_events(&mlx.events);
-
 	calculate_dimension(&mlx);
-
-	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, mlx.width_dimension, mlx.height_dimension, title);
-	printf("with and hegith (%d, %d)\n", mlx.width_dimension, mlx.height_dimension);
-
+	mlx.mlx_window = mlx_new_window(mlx.mlx_ptr, mlx.width_dimension,
+			mlx.height_dimension, title);
 	create_image(&mlx);
-
 	mlx_key_hook(mlx.mlx_window, get_key, &mlx);
 	mlx_hook(mlx.mlx_window, 17, 0, exit_program, &mlx);
 	mlx_loop(mlx.mlx_ptr);
 	mlx_destroy_window(mlx.mlx_ptr, mlx.mlx_window);
 	free(mlx.mlx_ptr);
+	mlx.mlx_ptr = NULL;
 	free(mlx.mlx_window);
+	mlx.mlx_window = NULL;
 	return (1);
 }
 
 int	main(int argc, char **argv)
 {
 	t_details	***map;
-	t_mlx_data mlx;
-
+	t_mlx_data	mlx;
 
 	map = NULL;
-	
 	if (argc == 2)
 	{
 		if (valid_file(argv[1], ".fdf", ft_strlen(argv[1])))
@@ -862,24 +843,10 @@ int	main(int argc, char **argv)
 			map = valid_axis(argv[1], &mlx.x_map, &mlx.y_map);
 			if (map)
 				create_mlx(mlx, map, argv[1]);
-				// draw_map(mlx, map, argv[1]);
 		}
 		else
-			printf("Error : file error\n");//edit the ft_errno to excute the error
+			ft_errno("No file", 1);
 	}
-
-
-
-	//adding valgrind to my linux ! to rememeber
-
-
-	// knowledge : https://github.com/VBrazhnik/FdF/wiki
-
-
-	//about map :
-			//min width must be in first line
-			//only digits can make the highness or will get z'0
-			//colors can take hexa or decimal
-			//if planning for bonus must add opacity
-
 }
+//adding valgrind to my linux ! to rememeber
+// knowledge : https://github.com/VBrazhnik/FdF/wiki

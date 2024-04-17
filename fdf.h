@@ -6,34 +6,34 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/09 18:43:35 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/16 22:40:34 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/17 20:20:01 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef FDF_H
-# define FDF_H
-
-#include <stdio.h>
 #include <mlx.h>
 #include <math.h>
-#include <X11/keysym.h>
 #include "get_next_line.h"
+
+#ifndef		FDF_H
+# define 	FDF_H
+
+// #include <X11/keysym.h>
 
 typedef struct s_details{
 	double	x;
 	double	y;
-	int	z;
-	int	color;
-	int length;
+	int		z;
+	int		color;
+	int		length;
 }	t_details;
 
 typedef struct s_image{
 	void	*img;
 	char	*addr;
-	int		bits_per_pixel;
+	int		bit_px;
 	int		line_length;
 	int		endian;
-} t_image;
+}	t_image;
 
 typedef struct s_hook{
 	double	z_rotation;
@@ -44,6 +44,7 @@ typedef struct s_hook{
 	double	vertical;
 
 	int		projection;
+	int		coloring;
 
 	double	zoom;
 
@@ -51,104 +52,83 @@ typedef struct s_hook{
 }	t_hook;
 
 typedef struct s_mlx_data{
-	void *mlx_ptr;
-	void *mlx_window;
+	void		*mlx_ptr;
+	void		*mlx_window;
+	int			x_map;
+	int			y_map;
 
-	int	x_map;
-	int	y_map;
+	double		scale_x;
+	double		scale_y;
 
-	double scale_x;
-	double scale_y;
+	int			x_min;
+	int			y_min;
 
-	int x_min;
-	int y_min;
+	int			width_dimension;
+	int			height_dimension;
 
-	int width_dimension;
-	int height_dimension;
+	t_image		image;
 
-	t_image	image;
+	t_details	***mlx_map;
+	t_details	***map_cpy;
 
-	t_details ***mlx_map;
-	t_details ***mlx_map_cpy;
+	t_hook		events;
+}	t_mlx_data;
 
-	t_hook	events;
-} t_mlx_data;
+# define UP 126
 
-#ifndef XK_Up
-#define XK_Up 126
-#endif
+# define DOWN 125
 
-#ifndef XK_Down
-#define XK_Down 125
-#endif
+# define RIGHT 124
 
-#ifndef XK_Right
-#define XK_Right 124
-#endif
+# define LEFT 123
 
-#ifndef XK_Left
-#define XK_Left 123
-#endif
+# define Z_BTN 6
 
-#ifndef XK_z
-#define XK_z 6
-#endif
+# define X_BTN 7
 
-#ifndef XK_x
-#define XK_x 7
-#endif
+# define Y_BTN 16
 
-#ifndef XK_y
-#define XK_y 16
-#endif
+# define ZOOM_IN 35
 
-#ifndef XK_p
-#define XK_p 35
-#endif
+# define ZOOM_OUT 46
 
+# define BTN_0 82
 
-#ifndef XK_m
-#define XK_m 46  
-#endif
+# define COLORING 51
 
-#ifndef XK_0
-#define XK_0 82
-#endif
+# define EXTRA 49
 
-#ifndef XK_space
-#define XK_space 49
-#endif
+# define ESC 53
 
-int	valid_file(char *name, char *fdf, int len);
+int			valid_file(char *name, char *fdf, int len);
 
-void	free_arr(char **arr, int len);
-void 	free_axis(t_details ***map, int len);
-void clear_map(t_details ***map, int len);
+void		free_arr(char **arr, int len);
+void 		free_axis(t_details ***map, int len);
+void 		clear_map(t_details ***map, int len);
 
 
-void ft_errno(void);
+// void ft_errno(void);
 
-int	ft_strncmp(char *str, char *cmp, int len);
+int			ft_strncmp(char *str, char *cmp, int len);
 
-int	ft_strchr(char *str, unsigned char c);
+int			ft_strchr(char *str, unsigned char c);
 
-int	ft_atox(char *str);
+int			ft_atox(char *str);
 
-int	ft_atoi(char *str);
+int			ft_atoi(char *str);
 
-int	get_value(char *str);
+int			get_value(char *str);
 
-t_details *get_data(char *str, int x_val, int y_val, int len, int y_max);
+t_details	*get_data(char *str, int x_val, int y_val, int len, int y_max);
 
-int	words_count(char *str, char *charset);
+int			words_count(char *str, char *charset);
 
-char	*ft_strdups(char **str, int len);
+char		*ft_strdups(char **str, int len);
 
-char	**ft_split_space(char *str, char *charset, int *len);
+char		**ft_split_space(char *str, char *charset, int *len);
 
-t_details **extract_axis(char *ligne, int min_width, int x, int y_max);
+t_details	**extract_axis(char *ligne, int min_width, int x, int y_max);
 
 t_details	***valid_axis(char *file, int *x_map, int *y_map);
-
 
 #endif
