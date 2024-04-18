@@ -1,23 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   fdf.h                                              :+:      :+:    :+:   */
+/*   fdf_bonus.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/03/09 18:43:35 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/17 22:53:59 by abounab          ###   ########.fr       */
+/*   Created: 2024/04/18 16:26:31 by abounab           #+#    #+#             */
+/*   Updated: 2024/04/18 17:41:18 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <mlx.h>
-#include <math.h>
-#include "get_next_line.h"
+#ifndef FDF_BONUS_H
+# define FDF_BONUS_H
 
-#ifndef		FDF_H
-# define 	FDF_H
-
-// #include <X11/keysym.h>
+# include <mlx.h>
+# include <math.h>
+# include "get_next_line.h"
 
 typedef struct s_details{
 	double	x;
@@ -100,26 +98,41 @@ typedef struct s_mlx_data{
 
 # define ESC 53
 
-int			valid_file(char *name, char *fdf, int len);
+void		dda(t_mlx_data data, t_details p1, t_details p2);
 
-void		free_arr(char **arr, int len);
-void 		free_axis(t_details ***map, int len);
-void 		clear_map(t_details ***map, int len);
+int			esc_button(t_mlx_data *mlx);
 
+int			calculate_dimension(t_mlx_data *mlx);
 
-// void ft_errno(void);
+int			get_key(int key, t_mlx_data *mlx);
 
 int			ft_strncmp(char *str, char *cmp, int len);
 
 int			ft_strchr(char *str, unsigned char c);
 
-int			ft_atox(char *str);
-
-int			ft_atoi(char *str);
-
 int			get_value(char *str);
 
-t_details	*get_data(char *str, int x_val, int y_val, int len, int y_max);
+int			exit_program(t_mlx_data *mlx);
+
+void		clear_map(t_details ***map, int len);
+
+void		free_axis(t_details ***map, int len);
+
+void		free_arr(char **arr, int len);
+
+int			ft_errno(char *str, int sign);
+
+int			exit_program(t_mlx_data *mlx);
+
+t_details	**extract_axis(char **ligne, int min_width, int y, int max_y);
+
+t_details	***get_mlx_cpy(t_mlx_data *mlx);
+
+void		create_image(t_mlx_data *mlx);
+
+int			rotation_matrices(t_mlx_data *mlx);
+
+int			increase(t_details **data, int zoom);
 
 int			words_count(char *str, char *charset);
 
@@ -127,8 +140,12 @@ char		*ft_strdups(char **str, int len);
 
 char		**ft_split_space(char *str, char *charset, int *len);
 
-t_details	**extract_axis(char **ligne, int min_width, int x, int y_max);
+int			add_events(t_hook *events);
 
-t_details	***valid_axis(char *file, int *x_map, int *y_map);
+int			mlx_instruction_put(t_mlx_data mlx);
+
+int			extra_coloring(t_mlx_data *mlx);
+
+int			extra_2d_projection(t_mlx_data *mlx);
 
 #endif
