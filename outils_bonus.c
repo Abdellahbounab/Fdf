@@ -6,7 +6,7 @@
 /*   By: abounab <abounab@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/18 16:35:41 by abounab           #+#    #+#             */
-/*   Updated: 2024/04/18 19:40:45 by abounab          ###   ########.fr       */
+/*   Updated: 2024/04/18 22:56:07 by abounab          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,13 @@ int	words_count(char *str, char *charset)
 	int	len;
 
 	len = 0;
-	if (str && *str && ft_strchr(charset, *str) == 1)
+	if (!str)
 		return (0);
-	len++;
-	str++;
+	if (str && *str && ft_strchr(charset, *str) == -1)
+	{
+		len++;
+		str++;
+	}
 	while (str && *str)
 	{
 		if (*str && ft_strchr(charset, *str) == -1 && ft_strchr(charset, *(str
