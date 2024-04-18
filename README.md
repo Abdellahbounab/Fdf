@@ -35,14 +35,22 @@ program in a clean way.
 20-60 map
 
 <img
-  src="fdf_images/20-60_map.jpg"
-  alt="20-60 map"
+  src="https://framagit.org/uploads/-/system/project/avatar/35715/DeepinScreenshot_select-area_20190112023829.png"
+  alt="1st one"
   title="20-60 map"
   style="display: block; margin: 10 auto; max-width: 500px">
-![20-60 image](fdf_images/20-60.jpg)
-map t1 with colors
-![t1 colored map](fdf_images/t1_map.jpg)
-![t1 colored image](fdf_images/t1.jpg)
+
+  
+<img
+  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrpwL-lRp9K4oLpxazKMir-u5rEn3FCfoQB_Sn23i4Bw&s"
+  alt="1st one"
+  title="20-60 map"
+  style="display: block; margin: 10 auto; max-width: 500px">
+<img
+  src="https://user-images.githubusercontent.com/21006147/190404961-988cedf9-bed6-417f-bed3-eb5dc2b7afda.png"
+  alt="2n one"
+  title="20-60 map"
+  style="display: block; margin: 10 auto; max-width: 500px">
 
 ## FdF plan
 - Argument input check.
