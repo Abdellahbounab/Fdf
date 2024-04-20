@@ -35,14 +35,14 @@ program in a clean way.
 20-60 map
 
 <img
-  src="https://framagit.org/uploads/-/system/project/avatar/35715/DeepinScreenshot_select-area_20190112023829.png"
+  src="2d.png"
   alt="1st one"
   title="20-60 map"
   style="display: block; margin: 10 auto; max-width: 500px">
 
   
 <img
-  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrpwL-lRp9K4oLpxazKMir-u5rEn3FCfoQB_Sn23i4Bw&s"
+  src="./iso_fade.png"
   alt="1st one"
   title="20-60 map"
   style="display: block; margin: 10 auto; max-width: 500px">
